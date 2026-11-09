@@ -23,3 +23,27 @@ Thumbs.db
 # Local environment overrides
 .env
 .env.local
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Node
+node_modules/
+
+# Java
+target/
+build/
+.gradle/
+
+# Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies/
+
+# IDE
+.idea/
+.vscode/
+
+# Logs
+*.log
