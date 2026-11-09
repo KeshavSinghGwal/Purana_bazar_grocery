@@ -1,0 +1,25 @@
+# Backend build output
+backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
+
+# Local database data
+.pgdata/
+
+# Flutter/Dart
+frontend/.dart_tool/
+frontend/build/
+frontend/.flutter-plugins-dependencies
+frontend/.packages
+frontend/**/*.iml
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local environment overrides
+.env
+.env.local
