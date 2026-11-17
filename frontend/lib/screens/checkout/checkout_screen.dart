@@ -4,11 +4,14 @@ import 'package:provider/provider.dart';
 import '../../core/api_client.dart';
 import '../../core/app_theme.dart';
 import '../../core/formatters.dart';
+import '../../core/razorpay_checkout.dart';
 import '../../models/models.dart';
+import '../../services/payment_service.dart';
 import '../../state/cart_provider.dart';
 import '../../state/location_provider.dart';
 import '../../widgets/common.dart';
 import '../location/addresses_screen.dart';
+import '../orders/order_details_screen.dart';
 import 'order_confirmation_screen.dart';
 
 class CheckoutScreen extends StatefulWidget {
@@ -26,7 +29,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   ShopQuote? _quote;
   bool _validating = true;
   bool _placing = false;
-  bool _onlineSelected = false;
+  String _paymentMethod = 'COD';
   String? _error;
   String? _lastAddressId;
 
@@ -113,17 +116,23 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       return;
     }
     setState(() => _placing = true);
+    final cart = context.read<CartProvider>();
     try {
       final data = await _api.post('/orders', body: {
         'addressId': address.id,
-        'paymentMethod': 'COD',
+        'paymentMethod': _paymentMethod,
         'idempotencyKey': _idempotencyKey,
         'customerNote': _note.text.trim().isEmpty ? null : _note.text.trim(),
       }) as Map<String, dynamic>;
       final order = Order.fromJson(data);
+      await cart.load(silent: true);
       if (!mounted) return;
-      await context.read<CartProvider>().load(silent: true);
-      if (!mounted) return;
+
+      if (_paymentMethod == 'ONLINE') {
+        await _payOnline(order);
+        return;
+      }
+
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(builder: (_) => OrderConfirmationScreen(order: order)),
         (route) => route.isFirst,
@@ -135,6 +144,39 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     } finally {
       if (mounted) setState(() => _placing = false);
     }
+  }
+
+  Future<void> _payOnline(Order order) async {
+    try {
+      final paid = await PaymentService.instance.payForOrder(context, order);
+      if (!mounted) return;
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => OrderConfirmationScreen(order: paid)),
+        (route) => route.isFirst,
+      );
+    } on PaymentCancelledException {
+      if (!mounted) return;
+      showMessage(
+        context,
+        'Payment cancelled. Your order is saved — you can pay from Orders.',
+        error: true,
+      );
+      _openSavedOrder(order);
+    } on PaymentException catch (error) {
+      if (!mounted) return;
+      showMessage(context, error.message, error: true);
+      _openSavedOrder(order);
+    } on ApiException catch (error) {
+      if (!mounted) return;
+      showMessage(context, error.message, error: true);
+      _openSavedOrder(order);
+    }
+  }
+
+  void _openSavedOrder(Order order) {
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => OrderDetailsScreen(orderId: order.id)),
+    );
   }
 
   @override
@@ -299,7 +341,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                               )
                             : Text(
                                 quote?.found == true
-                                    ? 'Place COD order · ${rupee(quote!.totalAmount)}'
+                                    ? _paymentMethod == 'ONLINE'
+                                        ? 'Pay ${rupee(quote!.totalAmount)} securely'
+                                        : 'Place COD order · ${rupee(quote!.totalAmount)}'
                                     : address == null
                                         ? 'Add a delivery address to continue'
                                         : _validating
@@ -508,101 +552,104 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   }
 
   Widget _paymentSection() {
+    final onlineSupported = RazorpayCheckout.isSupported;
     return AppCard(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text('Payment method', style: Theme.of(context).textTheme.titleSmall),
-          const SizedBox(height: 8),
-          InkWell(
-            onTap: () => setState(() => _onlineSelected = false),
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: !_onlineSelected ? AppColors.mint : Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: !_onlineSelected ? AppColors.green : AppColors.border,
-                ),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.payments_outlined,
-                      color: !_onlineSelected ? AppColors.green : AppColors.muted,
-                      size: 22),
-                  const SizedBox(width: 10),
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Cash on Delivery',
-                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
-                        ),
-                        SizedBox(height: 2),
-                        Text(
-                          'Pay the delivery partner when your order arrives.',
-                          style: TextStyle(fontSize: 10.5, color: AppColors.muted),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Icon(
-                    !_onlineSelected
-                        ? Icons.radio_button_checked_rounded
-                        : Icons.radio_button_off_rounded,
-                    color: !_onlineSelected ? AppColors.green : AppColors.muted,
-                    size: 20,
-                  ),
-                ],
-              ),
-            ),
+          const SizedBox(height: 10),
+          _paymentTile(
+            value: 'COD',
+            icon: Icons.payments_outlined,
+            title: 'Cash on Delivery',
+            subtitle: 'Pay the delivery partner when your order arrives.',
           ),
           const SizedBox(height: 8),
           Opacity(
-            opacity: 0.55,
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.border),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.credit_card_rounded, color: AppColors.muted, size: 22),
-                  const SizedBox(width: 10),
-                  const Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Pay online',
-                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
-                        ),
-                        SizedBox(height: 2),
-                        Text(
-                          'Coming soon — no payment gateway is configured.',
-                          style: TextStyle(fontSize: 10.5, color: AppColors.muted),
-                        ),
-                      ],
-                    ),
+            opacity: onlineSupported ? 1 : 0.55,
+            child: _paymentTile(
+              value: 'ONLINE',
+              icon: Icons.credit_card_rounded,
+              title: 'Pay online',
+              subtitle: onlineSupported
+                  ? 'UPI, cards, netbanking and wallets · secured by Razorpay'
+                  : 'Online payments are available in the Purana Bazaar web app.',
+              enabled: onlineSupported,
+            ),
+          ),
+          if (onlineSupported && _paymentMethod == 'ONLINE') ...[
+            const SizedBox(height: 9),
+            const Row(
+              children: [
+                Icon(Icons.lock_outline_rounded, size: 14, color: AppColors.muted),
+                SizedBox(width: 5),
+                Expanded(
+                  child: Text(
+                    'Razorpay securely processes the payment. Purana Bazaar never stores your card details.',
+                    style: TextStyle(fontSize: 10, height: 1.4, color: AppColors.muted),
                   ),
+                ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _paymentTile({
+    required String value,
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    bool enabled = true,
+  }) {
+    final selected = _paymentMethod == value;
+    return InkWell(
+      onTap: enabled ? () => setState(() => _paymentMethod = value) : null,
+      borderRadius: BorderRadius.circular(12),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: selected ? AppColors.mint : Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: selected ? AppColors.green : AppColors.border,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(icon,
+                color: selected ? AppColors.green : AppColors.muted, size: 22),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Text(
-                    'SOON',
-                    style: TextStyle(
-                      fontSize: 8,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 0.5,
-                      color: AppColors.muted,
-                    ),
+                    title,
+                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(fontSize: 10.5, color: AppColors.muted),
                   ),
                 ],
               ),
             ),
-          ),
-        ],
+            Icon(
+              selected
+                  ? Icons.radio_button_checked_rounded
+                  : Icons.radio_button_off_rounded,
+              color: selected ? AppColors.green : AppColors.muted,
+              size: 20,
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -623,7 +670,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ),
           const Divider(height: 20),
           InfoRow(
-            label: 'To pay (COD)',
+            label: _paymentMethod == 'ONLINE' ? 'To pay online' : 'To pay (COD)',
             value: rupee(quote.totalAmount),
             bold: true,
           ),

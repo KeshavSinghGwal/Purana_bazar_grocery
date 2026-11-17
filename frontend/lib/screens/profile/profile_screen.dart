@@ -9,7 +9,10 @@ import '../../state/cart_provider.dart';
 import '../../state/location_provider.dart';
 import '../../widgets/cart_button.dart';
 import '../../widgets/common.dart';
+import '../../widgets/notification_button.dart';
+import '../../state/notification_provider.dart';
 import '../location/addresses_screen.dart';
+import '../notifications/notifications_screen.dart';
 import '../orders/order_history_screen.dart';
 import '../wishlist/wishlist_screen.dart';
 
@@ -105,11 +108,16 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
+    final notifications = context.watch<NotificationProvider>();
     final user = auth.user;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Profile'),
-        actions: const [CartButton(), SizedBox(width: 4)],
+        actions: const [
+          NotificationButton(),
+          CartButton(),
+          SizedBox(width: 4),
+        ],
       ),
       body: SafeArea(
         child: PageWidth(
@@ -203,6 +211,32 @@ class ProfileScreen extends StatelessWidget {
                         MaterialPageRoute(builder: (_) => const OrderHistoryScreen()),
                       ),
                     ),
+                    const Divider(height: 1, indent: 58),
+                    _tile(
+                      icon: Icons.notifications_none_rounded,
+                      title: 'Notifications',
+                      subtitle: notifications.unread > 0
+                          ? '${notifications.unread} unread update${notifications.unread == 1 ? '' : 's'}'
+                          : 'Order updates, payments and alerts',
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const NotificationsScreen()),
+                      ),
+                    ),
+                    if (notifications.pushConfigured) ...[
+                      const Divider(height: 1, indent: 58),
+                      _tile(
+                        icon: notifications.pushDenied
+                            ? Icons.notifications_off_outlined
+                            : Icons.notifications_active_outlined,
+                        title: notifications.pushDenied
+                            ? 'Allow push notifications'
+                            : 'Push notifications',
+                        subtitle: notifications.pushDenied
+                            ? 'Blocked in this browser or device'
+                            : 'Enabled on this device',
+                        onTap: notifications.enablePush,
+                      ),
+                    ],
                     const Divider(height: 1, indent: 58),
                     _tile(
                       icon: Icons.favorite_border_rounded,

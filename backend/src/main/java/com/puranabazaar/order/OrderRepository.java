@@ -31,6 +31,8 @@ public interface OrderRepository extends JpaRepository<ShopOrder, Long> {
 
     Optional<ShopOrder> findByIdAndDeliveryPartnerId(Long id, Long deliveryPartnerId);
 
+    List<ShopOrder> findByOrderStatusAndCreatedAtBefore(OrderStatus status, java.time.Instant cutoff);
+
     long countByDeliveryPartnerIdAndOrderStatus(Long deliveryPartnerId, OrderStatus status);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)

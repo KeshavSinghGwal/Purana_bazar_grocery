@@ -29,6 +29,9 @@ public record OrderResponse(
         String cancellationReason,
         boolean canCancel,
         Instant createdAt,
-        Instant updatedAt
+        Instant updatedAt,
+        String paymentReference,
+        String paymentGateway,
+        boolean canRetryPayment
 ) {
 }

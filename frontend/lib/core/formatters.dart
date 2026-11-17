@@ -47,6 +47,7 @@ Color statusColor(String status) {
     case 'REJECTED':
     case 'CANCELLED':
     case 'FAILED':
+    case 'PAYMENT_FAILED':
     case 'SUSPENDED':
     case 'TEMPORARILY_CLOSED':
       return AppColors.red;

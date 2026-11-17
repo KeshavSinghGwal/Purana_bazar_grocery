@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../core/api_client.dart';
 import '../../core/app_theme.dart';
 import '../../core/formatters.dart';
 import '../../models/models.dart';
+import '../../services/payment_service.dart';
 import '../../widgets/common.dart';
 
 class OrderDetailsScreen extends StatefulWidget {
@@ -19,7 +22,9 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   final ApiClient _api = ApiClient.instance;
   Order? _order;
   bool _loading = true;
+  bool _paying = false;
   String? _error;
+  Timer? _refreshTimer;
 
   static const _timeline = [
     'PENDING',
@@ -34,22 +39,64 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   void initState() {
     super.initState();
     _load();
+    _refreshTimer = Timer.periodic(const Duration(seconds: 20), (_) {
+      final order = _order;
+      if (!mounted || order == null || _isTerminal(order.orderStatus)) return;
+      _load(silent: true);
+    });
   }
 
-  Future<void> _load() async {
-    setState(() {
-      _loading = _order == null;
-      _error = null;
-    });
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    super.dispose();
+  }
+
+  bool _isTerminal(String status) =>
+      status == 'DELIVERED' ||
+      status == 'CANCELLED' ||
+      status == 'REJECTED' ||
+      status == 'PAYMENT_FAILED';
+
+  Future<void> _load({bool silent = false}) async {
+    if (!silent) {
+      setState(() {
+        _loading = _order == null;
+        _error = null;
+      });
+    }
     try {
       final data = await _api.get('/orders/${widget.orderId}') as Map<String, dynamic>;
       if (!mounted) return;
       setState(() => _order = Order.fromJson(data));
     } on ApiException catch (error) {
       if (!mounted) return;
-      setState(() => _error = error.message);
+      if (!silent) setState(() => _error = error.message);
     } finally {
-      if (mounted) setState(() => _loading = false);
+      if (mounted && !silent) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _payNow() async {
+    final order = _order;
+    if (order == null || _paying) return;
+    setState(() => _paying = true);
+    try {
+      final paid = await PaymentService.instance.payForOrder(context, order);
+      if (!mounted) return;
+      setState(() => _order = paid);
+      showMessage(context, 'Payment successful. Your order is confirmed.');
+    } on PaymentCancelledException {
+      if (mounted) {
+        showMessage(context, 'Payment cancelled. You can retry any time.',
+            error: true);
+      }
+    } on PaymentException catch (error) {
+      if (mounted) showMessage(context, error.message, error: true);
+    } on ApiException catch (error) {
+      if (mounted) showMessage(context, error.message, error: true);
+    } finally {
+      if (mounted) setState(() => _paying = false);
     }
   }
 
@@ -205,7 +252,9 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                             children: [
                               _headerCard(order),
                               const SizedBox(height: 12),
-                              if (order.isCancelled)
+                              if (order.isAwaitingPayment)
+                                _paymentPendingCard(order)
+                              else if (order.isCancelled)
                                 _terminalStatus(order)
                               else
                                 _timelineCard(order),
@@ -244,6 +293,28 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                                   icon: const Icon(Icons.star_outline_rounded),
                                   label: const Text('Rate this shop'),
                                 ),
+                              if (order.canRetryPayment) ...[
+                                const SizedBox(height: 8),
+                                SizedBox(
+                                  width: double.infinity,
+                                  child: ElevatedButton.icon(
+                                    onPressed: _paying ? null : _payNow,
+                                    icon: _paying
+                                        ? const SizedBox(
+                                            width: 16,
+                                            height: 16,
+                                            child: CircularProgressIndicator(
+                                              strokeWidth: 2,
+                                              color: Colors.white,
+                                            ),
+                                          )
+                                        : const Icon(Icons.lock_outline_rounded, size: 18),
+                                    label: Text(_paying
+                                        ? 'Opening secure checkout…'
+                                        : 'Pay ${rupee(order.totalAmount)} now'),
+                                  ),
+                                ),
+                              ],
                               if (order.canCancel) ...[
                                 const SizedBox(height: 8),
                                 TextButton(
@@ -319,7 +390,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '${order.shoppingMode == 'PRODUCT_CHOICE' ? 'Product Choice' : 'Shop Choice'} · ${order.paymentMethod}',
+                      '${order.shoppingMode == 'PRODUCT_CHOICE' ? 'Product Choice' : 'Shop Choice'} · ${order.paymentMethod == 'COD' ? 'Cash on Delivery' : 'Online payment'}',
                       style: const TextStyle(fontSize: 10.5, color: AppColors.muted),
                     ),
                   ],
@@ -331,6 +402,78 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
               ),
             ],
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _paymentPendingCard(Order order) {
+    final failed = order.paymentStatus == 'FAILED';
+    return AppCard(
+      padding: const EdgeInsets.all(17),
+      color: const Color(0xFFFFF8E1),
+      borderColor: const Color(0xFFFFE082),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                failed ? Icons.error_outline_rounded : Icons.schedule_rounded,
+                color: const Color(0xFFB26A00),
+                size: 24,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  failed ? 'Payment failed' : 'Payment pending',
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF8A5200),
+                  ),
+                ),
+              ),
+              Text(
+                rupee(order.totalAmount),
+                style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w900,
+                  color: Color(0xFF8A5200),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 7),
+          Text(
+            'Order ${order.orderNumber} is reserved. Complete the payment to confirm it with '
+            '${order.shop.name}. Unpaid orders are released automatically after 2 hours.',
+            style: const TextStyle(fontSize: 11.5, height: 1.45, color: Color(0xFF8A5200)),
+          ),
+          if (order.canRetryPayment) ...[
+            const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _paying ? null : _payNow,
+                icon: _paying
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Icon(Icons.lock_outline_rounded, size: 18),
+                label: Text(_paying
+                    ? 'Opening secure checkout…'
+                    : failed
+                        ? 'Retry payment · ${rupee(order.totalAmount)}'
+                        : 'Pay ${rupee(order.totalAmount)} now'),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -554,35 +697,56 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
   }
 
   Widget _paymentCard(Order order) {
+    final online = order.paymentMethod != 'COD';
+    final reference = order.paymentReference;
     return AppCard(
       padding: const EdgeInsets.all(16),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(
-            order.paymentMethod == 'COD'
-                ? Icons.payments_outlined
-                : Icons.credit_card_rounded,
-            color: AppColors.green,
-            size: 23,
+          Row(
+            children: [
+              Icon(
+                online ? Icons.credit_card_rounded : Icons.payments_outlined,
+                color: AppColors.green,
+                size: 23,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      online ? 'Online payment' : 'Cash on Delivery',
+                      style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      online
+                          ? 'Secured by ${order.paymentGateway == 'RAZORPAY' ? 'Razorpay' : (order.paymentGateway ?? 'the payment gateway')}'
+                          : 'Collected by the delivery partner',
+                      style: const TextStyle(fontSize: 10, color: AppColors.muted),
+                    ),
+                  ],
+                ),
+              ),
+              StatusPill(status: order.paymentStatus),
+            ],
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  order.paymentMethod == 'COD' ? 'Cash on Delivery' : 'Online payment',
-                  style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'Payment status',
-                  style: const TextStyle(fontSize: 10, color: AppColors.muted),
-                ),
-              ],
+          if (reference != null && reference.isNotEmpty) ...[
+            const Divider(height: 22),
+            InfoRow(
+              label: online ? 'Payment ID' : 'Reference',
+              value: reference,
             ),
-          ),
-          StatusPill(status: order.paymentStatus),
+          ],
+          if (online && order.paymentStatus == 'REFUNDED') ...[
+            const SizedBox(height: 6),
+            const Text(
+              'Your refund has been initiated and usually reaches your account within 5–7 working days.',
+              style: TextStyle(fontSize: 10.5, height: 1.4, color: AppColors.muted),
+            ),
+          ],
         ],
       ),
     );
@@ -590,6 +754,10 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
 
   String _timelineLabel(String status) {
     switch (status) {
+      case 'PAYMENT_PENDING':
+        return 'Awaiting payment';
+      case 'PAYMENT_FAILED':
+        return 'Payment failed';
       case 'PENDING':
         return 'Order placed';
       case 'ACCEPTED':

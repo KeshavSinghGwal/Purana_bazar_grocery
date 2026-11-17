@@ -7,6 +7,7 @@ import 'core/api_client.dart';
 import 'state/auth_provider.dart';
 import 'state/cart_provider.dart';
 import 'state/location_provider.dart';
+import 'state/notification_provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,6 +18,10 @@ Future<void> main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider(preferences)),
+        ChangeNotifierProvider(
+          create: (context) =>
+              NotificationProvider(api, context.read<AuthProvider>()),
+        ),
         ChangeNotifierProvider(create: (_) => LocationProvider(api)),
         ChangeNotifierProvider(create: (_) => CartProvider(api)),
       ],

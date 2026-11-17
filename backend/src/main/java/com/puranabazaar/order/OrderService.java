@@ -12,19 +12,22 @@ import com.puranabazaar.inventory.ShopInventory;
 import com.puranabazaar.inventory.ShopInventoryRepository;
 import com.puranabazaar.marketplace.ShopSelectionService;
 import com.puranabazaar.marketplace.dto.ShopQuoteResponse;
+import com.puranabazaar.notification.NotificationService;
 import com.puranabazaar.order.dto.*;
 import com.puranabazaar.payment.Payment;
 import com.puranabazaar.payment.PaymentRepository;
+import com.puranabazaar.payment.PaymentService;
 import com.puranabazaar.security.CurrentUser;
 import com.puranabazaar.shop.*;
 import com.puranabazaar.user.User;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -42,15 +45,20 @@ public class OrderService {
     private final PaymentRepository paymentRepository;
     private final ShopSelectionService selectionService;
     private final DeliveryFeeCalculator feeCalculator;
-    private final ShopMapper shopMapper;
+    private final OrderMapper orderMapper;
+    private final NotificationService notificationService;
+    private final PaymentService paymentService;
     private final ZoneId zoneId;
+    private final long pendingTimeoutMinutes;
 
     public OrderService(OrderRepository orderRepository, CartRepository cartRepository,
                         CustomerAddressRepository addressRepository, ShopRepository shopRepository,
                         ShopInventoryRepository inventoryRepository, PaymentRepository paymentRepository,
                         ShopSelectionService selectionService, DeliveryFeeCalculator feeCalculator,
-                        ShopMapper shopMapper,
-                        @Value("${app.timezone:Asia/Kolkata}") String timezone) {
+                        OrderMapper orderMapper, NotificationService notificationService,
+                        PaymentService paymentService,
+                        @Value("${app.timezone:Asia/Kolkata}") String timezone,
+                        @Value("${app.payment.pending-timeout-minutes:120}") long pendingTimeoutMinutes) {
         this.orderRepository = orderRepository;
         this.cartRepository = cartRepository;
         this.addressRepository = addressRepository;
@@ -59,8 +67,11 @@ public class OrderService {
         this.paymentRepository = paymentRepository;
         this.selectionService = selectionService;
         this.feeCalculator = feeCalculator;
-        this.shopMapper = shopMapper;
+        this.orderMapper = orderMapper;
+        this.notificationService = notificationService;
+        this.paymentService = paymentService;
         this.zoneId = ZoneId.of(timezone);
+        this.pendingTimeoutMinutes = pendingTimeoutMinutes;
     }
 
     @Transactional
@@ -70,10 +81,6 @@ public class OrderService {
                 customer.getId(), request.idempotencyKey());
         if (replay.isPresent()) {
             return toResponse(replay.get());
-        }
-        if (request.paymentMethod() == PaymentMethod.ONLINE) {
-            throw new ApiException(HttpStatus.BAD_REQUEST, "ONLINE_PAYMENT_NOT_CONFIGURED",
-                    "Online payment is not enabled yet. Please choose Cash on Delivery.");
         }
 
         CustomerAddress address = addressRepository.findByIdAndCustomerId(request.addressId(), customer.getId())
@@ -141,6 +148,7 @@ public class OrderService {
         }
         subtotal = subtotal.setScale(2, RoundingMode.HALF_UP);
         BigDecimal delivery = feeCalculator.feeFor(subtotal);
+        boolean online = request.paymentMethod() == PaymentMethod.ONLINE;
 
         ShopOrder order = new ShopOrder();
         order.setCustomer(customer);
@@ -159,7 +167,7 @@ public class OrderService {
         order.setTotalAmount(subtotal.add(delivery));
         order.setPaymentMethod(request.paymentMethod());
         order.setPaymentStatus(PaymentStatus.PENDING);
-        order.setOrderStatus(OrderStatus.PENDING);
+        order.setOrderStatus(online ? OrderStatus.PAYMENT_PENDING : OrderStatus.PENDING);
         order.setCustomerNote(request.customerNote());
 
         for (Map.Entry<Long, Integer> entry : quantities.entrySet()) {
@@ -192,11 +200,32 @@ public class OrderService {
         payment.setPaymentMethod(request.paymentMethod());
         payment.setAmount(order.getTotalAmount());
         payment.setPaymentStatus(PaymentStatus.PENDING);
+        payment.setGateway(online ? "RAZORPAY" : "COD");
+        if (!online) {
+            payment.setPaymentReference("COD-" + order.getOrderNumber());
+        }
         paymentRepository.save(payment);
 
         cart.clearItems();
         cart.setSelectedShop(null);
         cartRepository.save(cart);
+
+        if (online) {
+            notificationService.notifyUser(customer, "Order created – complete payment",
+                    "Order " + order.getOrderNumber() + " is reserved for you. Pay ₹"
+                            + order.getTotalAmount().setScale(0) + " to confirm it with "
+                            + shop.getName() + ".",
+                    "PAYMENT", order.getId(), order.getOrderNumber());
+        } else {
+            notificationService.notifyUser(customer, "Order placed ✅",
+                    "Order " + order.getOrderNumber() + " is confirmed with " + shop.getName()
+                            + ". Pay ₹" + order.getTotalAmount().setScale(0) + " on delivery.",
+                    "ORDER", order.getId(), order.getOrderNumber());
+            notifyShopOwner(order, "New order received",
+                    "Order " + order.getOrderNumber() + " from " + customer.getName()
+                            + " · ₹" + order.getTotalAmount().setScale(0) + ". Accept it to start packing.",
+                    "ORDER");
+        }
 
         return toResponse(order);
     }
@@ -222,12 +251,20 @@ public class OrderService {
             throw ApiException.conflict("CANCEL_NOT_ALLOWED",
                     "This order can no longer be cancelled. Please contact the shop.");
         }
+        String cancellationReason = reason == null || reason.isBlank()
+                ? "Cancelled by customer" : reason.trim();
+        paymentService.refundIfPaid(order, cancellationReason);
         restoreStock(order);
         order.setOrderStatus(OrderStatus.CANCELLED);
-        order.setCancellationReason(reason == null || reason.isBlank()
-                ? "Cancelled by customer" : reason.trim());
+        order.setCancellationReason(cancellationReason);
         markPaymentFailedOrRefunded(order);
         orderRepository.save(order);
+        notifyStatus(order, "Order cancelled",
+                "Order " + order.getOrderNumber() + " was cancelled. Any reserved stock has been restored.");
+        notifyShopOwner(order, "Order cancelled by customer",
+                "Order " + order.getOrderNumber() + " was cancelled by " + order.getCustomer().getName()
+                        + ". Reserved stock has been restored.",
+                "ORDER");
         return toResponse(order);
     }
 
@@ -255,22 +292,26 @@ public class OrderService {
                     "Cannot change order status from " + order.getOrderStatus() + " to " + target + ".");
         }
         if (target == OrderStatus.REJECTED || target == OrderStatus.CANCELLED) {
+            String cancellationReason = request.reason() == null || request.reason().isBlank()
+                    ? "Rejected by shop" : request.reason().trim();
+            paymentService.refundIfPaid(order, cancellationReason);
             restoreStock(order);
-            order.setCancellationReason(request.reason() == null || request.reason().isBlank()
-                    ? "Rejected by shop" : request.reason().trim());
+            order.setCancellationReason(cancellationReason);
             markPaymentFailedOrRefunded(order);
         }
-        if (target == OrderStatus.DELIVERED) {
-            order.setPaymentStatus(PaymentStatus.PAID);
-            paymentRepository.findByOrderId(order.getId()).ifPresent(payment -> {
-                payment.setPaymentStatus(PaymentStatus.PAID);
-                payment.setPaymentReference("COD-" + order.getOrderNumber());
-                payment.setUpdatedAt(java.time.Instant.now());
-                paymentRepository.save(payment);
-            });
+        if (target == OrderStatus.DELIVERED && order.getPaymentMethod() == PaymentMethod.COD) {
+            paymentService.markCodPaid(order);
         }
         order.setOrderStatus(target);
         orderRepository.save(order);
+        notifyCustomerOfStatus(order, target);
+        if (target == OrderStatus.READY_FOR_PICKUP) {
+            notificationService.notifyRole(com.puranabazaar.user.Role.DELIVERY_PARTNER,
+                    "Pickup available",
+                    "Order " + order.getOrderNumber() + " is ready for pickup at "
+                            + order.getShop().getName() + ".",
+                    "DELIVERY", order.getId(), order.getOrderNumber());
+        }
         return toResponse(order);
     }
 
@@ -282,47 +323,105 @@ public class OrderService {
                 || order.getOrderStatus() == OrderStatus.REJECTED) {
             throw ApiException.conflict("CANCEL_NOT_ALLOWED", "This order cannot be cancelled.");
         }
+        String cancellationReason = reason == null || reason.isBlank()
+                ? "Cancelled by administrator" : reason.trim();
+        paymentService.refundIfPaid(order, cancellationReason);
         restoreStock(order);
         order.setOrderStatus(OrderStatus.CANCELLED);
-        order.setCancellationReason(reason == null || reason.isBlank()
-                ? "Cancelled by administrator" : reason.trim());
+        order.setCancellationReason(cancellationReason);
         markPaymentFailedOrRefunded(order);
         orderRepository.save(order);
+        notifyStatus(order, "Order cancelled",
+                "Order " + order.getOrderNumber() + " was cancelled by Purana Bazaar support.");
+        notifyShopOwner(order, "Order cancelled by admin",
+                "Order " + order.getOrderNumber() + " was cancelled. " + cancellationReason,
+                "ORDER");
         return toResponse(order);
     }
 
+    /**
+     * Cancels online orders whose payment never completed and releases the
+     * reserved stock. Called by the scheduled payment expiry job.
+     */
+    @Transactional
+    public int expireUnpaidOnlineOrders() {
+        Instant cutoff = Instant.now().minus(Duration.ofMinutes(Math.max(5, pendingTimeoutMinutes)));
+        List<ShopOrder> stale = orderRepository
+                .findByOrderStatusAndCreatedAtBefore(OrderStatus.PAYMENT_PENDING, cutoff);
+        int expired = 0;
+        for (ShopOrder order : stale) {
+            if (order.getPaymentMethod() != PaymentMethod.ONLINE
+                    || order.getPaymentStatus() == PaymentStatus.PAID) {
+                continue;
+            }
+            restoreStock(order);
+            order.setOrderStatus(OrderStatus.CANCELLED);
+            order.setCancellationReason("Payment was not completed in time.");
+            markPaymentFailedOrRefunded(order);
+            paymentService.markPaymentExpired(order);
+            orderRepository.save(order);
+            notifyStatus(order, "Order expired",
+                    "Order " + order.getOrderNumber() + " was cancelled because the payment was not completed. "
+                            + "Reserved stock was released.");
+            expired++;
+        }
+        return expired;
+    }
+
     public OrderResponse toResponse(ShopOrder order) {
-        List<OrderItemResponse> items = order.getItems().stream()
-                .map(item -> new OrderItemResponse(item.getId(), item.getProduct().getId(),
-                        item.getProductNameSnapshot(), item.getBrandSnapshot(), item.getUnitSnapshot(),
-                        item.getImageUrlSnapshot(), item.getPriceSnapshot(), item.getQuantity(),
-                        item.getTotalPrice()))
-                .toList();
-        return new OrderResponse(
-                order.getId(),
-                order.getOrderNumber(),
-                order.getShoppingMode().name(),
-                order.getOrderStatus().name(),
-                order.getPaymentStatus().name(),
-                order.getPaymentMethod().name(),
-                shopMapper.toResponse(order.getShop(), order.getDeliveryLatitude(), order.getDeliveryLongitude()),
-                order.getCustomer().getName(),
-                order.getCustomer().getPhone(),
-                order.getDeliveryPartner() == null ? null : order.getDeliveryPartner().getName(),
-                order.getDeliveryPartner() == null ? null : order.getDeliveryPartner().getPhone(),
-                order.getDeliveryAddress(),
-                order.getDeliveryLatitude(),
-                order.getDeliveryLongitude(),
-                order.getSubtotal(),
-                order.getDeliveryCharge(),
-                order.getTotalAmount(),
-                items,
-                order.getCustomerNote(),
-                order.getCancellationReason(),
-                isCustomerCancellable(order.getOrderStatus()),
-                order.getCreatedAt(),
-                order.getUpdatedAt()
-        );
+        return orderMapper.toResponse(order);
+    }
+
+    private void notifyCustomerOfStatus(ShopOrder order, OrderStatus target) {
+        String title;
+        String body;
+        switch (target) {
+            case ACCEPTED -> {
+                title = "Order accepted";
+                body = order.getShop().getName() + " accepted order " + order.getOrderNumber()
+                        + " and will start packing it.";
+            }
+            case PREPARING -> {
+                title = "Your order is being packed";
+                body = "Order " + order.getOrderNumber() + " is being prepared at "
+                        + order.getShop().getName() + ".";
+            }
+            case READY_FOR_PICKUP -> {
+                title = "Ready for pickup";
+                body = "Order " + order.getOrderNumber() + " is packed and waiting for a delivery partner.";
+            }
+            case OUT_FOR_DELIVERY -> {
+                title = "Out for delivery 🛵";
+                body = "Order " + order.getOrderNumber() + " is on its way to you.";
+            }
+            case DELIVERED -> {
+                title = "Delivered 🎉";
+                body = "Order " + order.getOrderNumber() + " has been delivered. Enjoy your groceries!";
+            }
+            case REJECTED -> {
+                title = "Order rejected";
+                body = "Unfortunately " + order.getShop().getName() + " could not accept order "
+                        + order.getOrderNumber() + ". Any payment will be refunded.";
+            }
+            case CANCELLED -> {
+                title = "Order cancelled";
+                body = "Order " + order.getOrderNumber() + " was cancelled by the shop.";
+            }
+            default -> {
+                return;
+            }
+        }
+        notifyStatus(order, title, body);
+    }
+
+    private void notifyStatus(ShopOrder order, String title, String body) {
+        notificationService.notifyUser(order.getCustomer(), title, body, "ORDER",
+                order.getId(), order.getOrderNumber());
+    }
+
+    private void notifyShopOwner(ShopOrder order, String title, String body, String type) {
+        notificationService.notifyUser(order.getShop().getOwner(), title, body, type,
+                order.getId(), order.getOrderNumber());
     }
 
     private void restoreStock(ShopOrder order) {
@@ -348,11 +447,12 @@ public class OrderService {
 
     private void markPaymentFailedOrRefunded(ShopOrder order) {
         PaymentStatus newStatus = order.getPaymentStatus() == PaymentStatus.PAID
+                || order.getPaymentStatus() == PaymentStatus.REFUNDED
                 ? PaymentStatus.REFUNDED : PaymentStatus.FAILED;
         order.setPaymentStatus(newStatus);
         paymentRepository.findByOrderId(order.getId()).ifPresent(payment -> {
             payment.setPaymentStatus(newStatus);
-            payment.setUpdatedAt(java.time.Instant.now());
+            payment.setUpdatedAt(Instant.now());
             paymentRepository.save(payment);
         });
     }
@@ -385,8 +485,7 @@ public class OrderService {
     }
 
     private boolean isCustomerCancellable(OrderStatus status) {
-        return status == OrderStatus.PENDING || status == OrderStatus.ACCEPTED
-                || status == OrderStatus.PREPARING || status == OrderStatus.PAYMENT_PENDING;
+        return OrderMapper.isCustomerCancellable(status);
     }
 
     private boolean isOwnerTransitionAllowed(OrderStatus current, OrderStatus target) {

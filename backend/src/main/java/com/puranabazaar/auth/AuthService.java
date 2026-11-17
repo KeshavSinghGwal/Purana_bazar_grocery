@@ -2,6 +2,7 @@ package com.puranabazaar.auth;
 
 import com.puranabazaar.auth.dto.*;
 import com.puranabazaar.common.ApiException;
+import com.puranabazaar.notification.NotificationService;
 import com.puranabazaar.security.CurrentUser;
 import com.puranabazaar.security.JwtService;
 import com.puranabazaar.shop.Shop;
@@ -24,19 +25,23 @@ public class AuthService {
     private final ShopRepository shopRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final NotificationService notificationService;
 
     public AuthService(UserRepository userRepository, ShopRepository shopRepository,
-                       PasswordEncoder passwordEncoder, JwtService jwtService) {
+                       PasswordEncoder passwordEncoder, JwtService jwtService,
+                       NotificationService notificationService) {
         this.userRepository = userRepository;
         this.shopRepository = shopRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
+        this.notificationService = notificationService;
     }
 
     @Transactional
     public AuthResponse registerCustomer(RegisterRequest request) {
         User user = createUser(request, Role.CUSTOMER);
         String token = jwtService.generateToken(user);
+        notificationService.sendWelcome(user);
         return AuthResponse.of(token, jwtService.getExpirationMinutes(), toUser(user));
     }
 
@@ -62,6 +67,11 @@ public class AuthService {
         shop = shopRepository.save(shop);
 
         String token = jwtService.generateToken(owner);
+        final Shop savedShop = shop;
+        notificationService.runAfterCommit(() -> notificationService.notifyUser(owner,
+                "Shop registration received",
+                savedShop.getName() + " is pending administrator approval. We will notify you as soon as it is reviewed.",
+                "SHOP", null, null));
         return new AuthResponse(token, "Bearer", jwtService.getExpirationMinutes(),
                 toUser(owner), shop.getId(), shop.getApprovalStatus().name());
     }

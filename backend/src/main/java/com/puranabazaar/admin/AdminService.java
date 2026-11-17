@@ -5,6 +5,7 @@ import com.puranabazaar.admin.dto.AdminDashboardResponse;
 import com.puranabazaar.catalog.CategoryRepository;
 import com.puranabazaar.catalog.ProductRepository;
 import com.puranabazaar.common.ApiException;
+import com.puranabazaar.notification.NotificationService;
 import com.puranabazaar.order.OrderRepository;
 import com.puranabazaar.order.OrderService;
 import com.puranabazaar.order.OrderStatus;
@@ -36,10 +37,12 @@ public class AdminService {
     private final OrderService orderService;
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final NotificationService notificationService;
 
     public AdminService(ShopRepository shopRepository, ShopMapper shopMapper, UserRepository userRepository,
                         OrderRepository orderRepository, OrderService orderService,
-                        ProductRepository productRepository, CategoryRepository categoryRepository) {
+                        ProductRepository productRepository, CategoryRepository categoryRepository,
+                        NotificationService notificationService) {
         this.shopRepository = shopRepository;
         this.shopMapper = shopMapper;
         this.userRepository = userRepository;
@@ -47,6 +50,7 @@ public class AdminService {
         this.orderService = orderService;
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
+        this.notificationService = notificationService;
     }
 
     @Transactional(readOnly = true)
@@ -93,6 +97,9 @@ public class AdminService {
         shop.setRejectionReason(null);
         shop.setOperationalStatus(ShopOperationalStatus.ACTIVE);
         shopRepository.save(shop);
+        notificationService.notifyUser(shop.getOwner(), "Shop approved 🎉",
+                shop.getName() + " is now live on Purana Bazaar. Customers can find and order from you.",
+                "SHOP", null, null);
         return shopMapper.toResponse(shop, null, null);
     }
 
@@ -102,6 +109,10 @@ public class AdminService {
         shop.setApprovalStatus(ShopApprovalStatus.REJECTED);
         shop.setRejectionReason(reason);
         shopRepository.save(shop);
+        notificationService.notifyUser(shop.getOwner(), "Shop registration needs attention",
+                "Your shop " + shop.getName() + " could not be approved."
+                        + (reason == null || reason.isBlank() ? "" : " Reason: " + reason),
+                "SHOP", null, null);
         return shopMapper.toResponse(shop, null, null);
     }
 
@@ -111,6 +122,10 @@ public class AdminService {
         shop.setApprovalStatus(ShopApprovalStatus.SUSPENDED);
         shop.setRejectionReason(reason);
         shopRepository.save(shop);
+        notificationService.notifyUser(shop.getOwner(), "Shop suspended",
+                shop.getName() + " has been suspended and is hidden from customers."
+                        + (reason == null || reason.isBlank() ? "" : " Reason: " + reason),
+                "SHOP", null, null);
         return shopMapper.toResponse(shop, null, null);
     }
 
@@ -135,6 +150,11 @@ public class AdminService {
                 .orElseThrow(() -> ApiException.notFound("CUSTOMER_NOT_FOUND", "Customer not found."));
         user.setActive(active);
         userRepository.save(user);
+        notificationService.notifyUser(user, active ? "Account reactivated" : "Account suspended",
+                active
+                        ? "Your Purana Bazaar account is active again. Welcome back!"
+                        : "Your account has been suspended. Please contact support if you believe this is a mistake.",
+                "ACCOUNT", null, null);
         return new AdminCustomerResponse(user.getId(), user.getName(), user.getEmail(), user.getPhone(),
                 user.isActive(), user.getCreatedAt(), orderRepository.countByCustomerId(user.getId()));
     }

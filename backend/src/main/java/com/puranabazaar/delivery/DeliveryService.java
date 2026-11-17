@@ -2,11 +2,11 @@ package com.puranabazaar.delivery;
 
 import com.puranabazaar.common.ApiException;
 import com.puranabazaar.delivery.dto.DeliveryDashboardResponse;
+import com.puranabazaar.notification.NotificationService;
 import com.puranabazaar.order.*;
 import com.puranabazaar.order.dto.OrderResponse;
 import com.puranabazaar.order.dto.UpdateOrderStatusRequest;
-import com.puranabazaar.payment.Payment;
-import com.puranabazaar.payment.PaymentRepository;
+import com.puranabazaar.payment.PaymentService;
 import com.puranabazaar.security.CurrentUser;
 import com.puranabazaar.user.User;
 import org.springframework.stereotype.Service;
@@ -22,14 +22,16 @@ public class DeliveryService {
             List.of(OrderStatus.READY_FOR_PICKUP, OrderStatus.OUT_FOR_DELIVERY);
 
     private final OrderRepository orderRepository;
-    private final PaymentRepository paymentRepository;
+    private final PaymentService paymentService;
     private final OrderService orderService;
+    private final NotificationService notificationService;
 
-    public DeliveryService(OrderRepository orderRepository, PaymentRepository paymentRepository,
-                           OrderService orderService) {
+    public DeliveryService(OrderRepository orderRepository, PaymentService paymentService,
+                           OrderService orderService, NotificationService notificationService) {
         this.orderRepository = orderRepository;
-        this.paymentRepository = paymentRepository;
+        this.paymentService = paymentService;
         this.orderService = orderService;
+        this.notificationService = notificationService;
     }
 
     @Transactional(readOnly = true)
@@ -94,6 +96,14 @@ public class DeliveryService {
         order.setDeliveryPartner(partner);
         order.setDeliveryAssignedAt(Instant.now());
         orderRepository.save(order);
+
+        notificationService.notifyUser(order.getCustomer(), "Delivery partner assigned",
+                partner.getName() + " will deliver order " + order.getOrderNumber()
+                        + ". They will call you if needed.",
+                "DELIVERY", order.getId(), order.getOrderNumber());
+        notificationService.notifyUser(order.getShop().getOwner(), "Order assigned for delivery",
+                partner.getName() + " accepted order " + order.getOrderNumber() + " for pickup.",
+                "DELIVERY", order.getId(), order.getOrderNumber());
         return orderService.toResponse(order);
     }
 
@@ -115,16 +125,24 @@ public class DeliveryService {
                     "Cannot change order status from " + order.getOrderStatus() + " to " + target + ".");
         }
         if (target == OrderStatus.DELIVERED) {
-            order.setPaymentStatus(PaymentStatus.PAID);
-            paymentRepository.findByOrderId(order.getId()).ifPresent(payment -> {
-                payment.setPaymentStatus(PaymentStatus.PAID);
-                payment.setPaymentReference("COD-" + order.getOrderNumber());
-                payment.setUpdatedAt(Instant.now());
-                paymentRepository.save(payment);
-            });
+            paymentService.markCodPaid(order);
         }
         order.setOrderStatus(target);
         orderRepository.save(order);
+
+        if (target == OrderStatus.OUT_FOR_DELIVERY) {
+            notificationService.notifyUser(order.getCustomer(), "Out for delivery 🛵",
+                    order.getDeliveryPartner().getName() + " is on the way with order "
+                            + order.getOrderNumber() + ".",
+                    "DELIVERY", order.getId(), order.getOrderNumber());
+        } else if (target == OrderStatus.DELIVERED) {
+            notificationService.notifyUser(order.getCustomer(), "Delivered 🎉",
+                    "Order " + order.getOrderNumber() + " has been delivered. Enjoy your groceries!",
+                    "DELIVERY", order.getId(), order.getOrderNumber());
+            notificationService.notifyUser(order.getShop().getOwner(), "Order delivered",
+                    "Order " + order.getOrderNumber() + " was delivered successfully.",
+                    "DELIVERY", order.getId(), order.getOrderNumber());
+        }
         return orderService.toResponse(order);
     }
 

@@ -2,8 +2,8 @@
 
 Purana Bazaar is a full-stack, multi-vendor neighbourhood grocery marketplace. Customers can shop by **Product Choice** (the backend finds the nearest eligible shop that can fulfil the whole cart) or by **Shop Choice** (the customer picks one shop and only that shop's inventory is used). Shop owners manage stock, prices and the order lifecycle, while administrators approve shops, moderate the catalog and oversee orders.
 
-- **Backend:** Java 21, Spring Boot 4, Spring Security, Spring Data JPA, PostgreSQL, JWT, BCrypt
-- **Frontend:** Flutter 3.44, Provider, `http`, `shared_preferences`, `intl`
+- **Backend:** Java 21, Spring Boot 4, Spring Security, Spring Data JPA, PostgreSQL, JWT, BCrypt, Razorpay REST API, Firebase Admin SDK
+- **Frontend:** Flutter 3.44, Provider, `http`, `shared_preferences`, `intl`, Razorpay Checkout (web), Firebase Cloud Messaging
 - **Design:** green-and-white, Blinkit-style responsive UI. No reference screenshot was supplied with the brief, so the visual system follows the written description.
 
 ---
@@ -15,13 +15,15 @@ purana-bazaar/
 ├── backend/                 Spring Boot REST API
 │   ├── src/main/java/       controllers, services, entities, security, seeding
 │   ├── src/main/resources/  application.properties
-│   └── src/test/java/       MarketplaceFlowIntegrationTest (10 scenarios)
+│   └── src/test/java/       MarketplaceFlowIntegrationTest (12 scenarios)
 ├── frontend/                Flutter app
-│   ├── lib/core/            API client, theme, formatters
+│   ├── lib/core/            API client, theme, formatters, Firebase/Razorpay adapters
 │   ├── lib/models/          DTO models
-│   ├── lib/state/           Auth, location and cart providers
+│   ├── lib/services/        Payment and order API calls
+│   ├── lib/state/           Auth, location, cart and notification providers
 │   ├── lib/screens/         customer, owner and admin experiences
 │   ├── lib/widgets/         shared UI components
+│   ├── web/                 Razorpay JS bridge and FCM service worker
 │   └── test/                model and formatter tests
 └── .pgdata/                 local PostgreSQL 17 data directory (not source-controlled)
 ```
@@ -38,8 +40,9 @@ purana-bazaar/
 - **Shop Choice:** browse a shop's live inventory, add by `shopInventoryId`, single-shop enforcement
 - Delivery address management with latitude/longitude
 - Cart quantity controls, stock/availability warnings and mode conflict errors
-- Checkout with address selection, COD, order confirmation and idempotency key reuse
-- Order history/details, customer cancellation while the order is still cancellable
+- Checkout with address selection, **Cash on Delivery or Razorpay online payment**, order confirmation and idempotency key reuse
+- Order history/details, retry payment for unpaid online orders, customer cancellation while the order is still cancellable
+- In-app notification centre (bell + badge) and optional Firebase push notifications
 - Reviews after a delivered order from that shop
 
 ### Shop owner
@@ -198,8 +201,111 @@ Serve `frontend/build/web` with any static web server. CORS in the backend allow
 | Demo seeding | `SEED_ENABLED` | `true` |
 | CORS origins | `CORS_ORIGINS` | `http://localhost:*,http://127.0.0.1:*` |
 | Business timezone | `app.timezone` | `Asia/Kolkata` |
+| Razorpay key id | `RAZORPAY_KEY_ID` | empty |
+| Razorpay key secret | `RAZORPAY_KEY_SECRET` | empty |
+| Razorpay webhook secret | `RAZORPAY_WEBHOOK_SECRET` | empty |
+| Razorpay local mock mode | `RAZORPAY_MOCK_ENABLED` | `false` |
+| Unpaid online order timeout | `PAYMENT_PENDING_TIMEOUT_MINUTES` | `120` |
+| FCM service account JSON | `FIREBASE_SERVICE_ACCOUNT_JSON` | empty |
+| FCM service account file | `FIREBASE_SERVICE_ACCOUNT_FILE` | empty |
+| FCM project id | `FIREBASE_PROJECT_ID` | derived from the service account |
 
 **Important:** replace `JWT_SECRET` and use a real password in any non-local environment. `spring.jpa.hibernate.ddl-auto=update` is used for local development; production deployments should use versioned migrations (for example Flyway or Liquibase).
+
+---
+
+## Online payments (Razorpay)
+
+Checkout accepts `COD` or `ONLINE`. An `ONLINE` order is created as `PAYMENT_PENDING` and its stock is reserved immediately; the app then creates a Razorpay order, opens Razorpay Checkout, and verifies the signature on the backend before the order moves to `PENDING` with payment status `PAID`. Failed or abandoned payments stay retryable from the order details screen, and unpaid orders are cancelled automatically after `PAYMENT_PENDING_TIMEOUT_MINUTES`, which releases the reserved stock. Cancelling or rejecting a paid order triggers a best-effort Razorpay refund.
+
+### Configure live payments
+
+1. Create a Razorpay account and copy the **Key ID** and **Key Secret** from *Dashboard → Account & Settings → API Keys*.
+2. Export them before starting the backend:
+
+   ```powershell
+   $env:RAZORPAY_KEY_ID = 'rzp_live_...'
+   $env:RAZORPAY_KEY_SECRET = '...'
+   $env:RAZORPAY_WEBHOOK_SECRET = '...'
+   ```
+
+3. Add a webhook in *Dashboard → Account & Settings → Webhooks* pointing at
+   `https://<your-host>/api/payments/razorpay/webhook` and subscribe to
+   `payment.captured`, `payment.failed`, `order.paid` and `refund.processed`.
+   The webhook secret must match `RAZORPAY_WEBHOOK_SECRET`.
+
+The backend verifies `X-Razorpay-Signature` over the raw request body, so the
+webhook remains the source of truth even if the browser closes before the
+verification call. The frontend loads Razorpay's `checkout.js` on demand from
+`https://checkout.razorpay.com/v1/checkout.js`, which must be reachable from the
+customer's browser.
+
+### Local mock mode
+
+For local demos without Razorpay keys:
+
+```powershell
+$env:RAZORPAY_MOCK_ENABLED = 'true'
+.\mvnw.cmd spring-boot:run
+```
+
+The backend creates `order_mock_*` sessions and accepts the signature `mock`.
+The Flutter web app shows a **Razorpay test checkout** dialog instead of the
+real Checkout window, so the complete order → pay → notification → refund flow
+can be exercised offline. Mock mode is ignored when real keys are configured.
+
+---
+
+## Push notifications (Firebase Cloud Messaging)
+
+Every order, payment, delivery and account event is written to the in-app
+notification centre (`app_notifications`) and shown through the bell in the app.
+Push delivery is optional and additive: without Firebase credentials the app and
+the notification centre keep working, and the backend logs
+`FCM is not configured`.
+
+### Backend setup
+
+1. Create a Firebase project and generate a service account key
+   (*Project settings → Service accounts → Generate new private key*).
+2. Provide the key in one of these forms before starting the backend:
+
+   ```powershell
+   # Raw JSON or base64-encoded JSON
+   $env:FIREBASE_SERVICE_ACCOUNT_JSON = Get-Content .\service-account.json -Raw
+   # ...or a path to the JSON file
+   $env:FIREBASE_SERVICE_ACCOUNT_FILE = 'D:\secrets\service-account.json'
+   # Optional when it cannot be inferred from the service account
+   $env:FIREBASE_PROJECT_ID = 'your-project-id'
+   ```
+
+3. Restart the backend. `GET /api/notifications/unread-count` reports
+   `pushEnabled: true` once Firebase Admin initialises.
+
+### Flutter web setup
+
+Supply the Firebase **Web app** config plus a Web Push certificate (VAPID key)
+at build/run time. The values come from *Project settings → General → Your apps*
+and *Cloud Messaging → Web Push certificates*:
+
+```powershell
+flutter run -d chrome --no-web-resources-cdn `
+  --dart-define=API_BASE_URL=http://localhost:8081/api `
+  --dart-define=FIREBASE_API_KEY=... `
+  --dart-define=FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com `
+  --dart-define=FIREBASE_PROJECT_ID=your-project `
+  --dart-define=FIREBASE_STORAGE_BUCKET=your-project.firebasestorage.app `
+  --dart-define=FIREBASE_MESSAGING_SENDER_ID=... `
+  --dart-define=FIREBASE_APP_ID=... `
+  --dart-define=FIREBASE_VAPID_KEY=...
+```
+
+Replace the placeholders in `frontend/web/firebase-messaging-sw.js` with the same
+web config so background pushes are displayed while the app is closed. Android
+builds use the same `FIREBASE_*` dart-defines through `firebase_options.dart`,
+and need `google-services.json` for the `firebase_messaging` plugin in a
+production build. The app asks for notification permission on first run and
+registers the resulting device token with `POST /api/notifications/devices`.
 
 ---
 
@@ -315,7 +421,25 @@ Checkout body:
 }
 ```
 
-`idempotencyKey` must be 8–80 characters and is unique per customer. Replaying the same key returns the original order without deducting stock again. `ONLINE` is reserved and currently returns `ONLINE_PAYMENT_NOT_CONFIGURED`; use `COD`.
+`idempotencyKey` must be 8–80 characters and is unique per customer. Replaying the same key returns the original order without deducting stock again. Set `paymentMethod` to `ONLINE` to pay through Razorpay; the order starts as `PAYMENT_PENDING` and is confirmed after signature verification.
+
+| Method | Path | Access | Purpose |
+| --- | --- | --- | --- |
+| POST | `/payments/razorpay/order` | Customer | Create/reuse a Razorpay order for an `ONLINE` order |
+| POST | `/payments/razorpay/verify` | Customer | Verify the Checkout signature and mark the order paid |
+| GET | `/payments/orders/{orderId}` | Customer | Payment status and whether the payment can be retried |
+| POST | `/payments/razorpay/webhook` | Razorpay | Signature-verified payment/refund webhook |
+
+### Notifications
+
+| Method | Path | Access | Purpose |
+| --- | --- | --- | --- |
+| GET | `/notifications` | Authenticated | Notification history, optional `unreadOnly=true` |
+| GET | `/notifications/unread-count` | Authenticated | Unread badge count and `pushEnabled` flag |
+| PUT | `/notifications/{id}/read` | Authenticated | Mark one notification read |
+| PUT | `/notifications/read-all` | Authenticated | Mark every notification read |
+| POST | `/notifications/devices` | Authenticated | Register an FCM device token |
+| DELETE | `/notifications/devices?token=...` | Authenticated | Remove a device token |
 
 ### Wishlist
 
@@ -384,7 +508,7 @@ Catalog deletes are soft deactivations, so historical orders and inventory refer
 }
 ```
 
-Common codes include `UNAUTHORIZED`, `FORBIDDEN`, `VALIDATION_FAILED`, `CART_EMPTY`, `CART_MODE_CONFLICT`, `MIXED_SHOP_CART`, `INSUFFICIENT_STOCK`, `OUT_OF_STOCK`, `NO_ELIGIBLE_SHOP`, `SHOP_CLOSED`, `OUTSIDE_DELIVERY_RADIUS`, `INVALID_STATUS_TRANSITION`, `CANCEL_NOT_ALLOWED`, `ORDER_NOT_FOUND`, `SHOP_NOT_FOUND`, `CONCURRENT_UPDATE` and `ONLINE_PAYMENT_NOT_CONFIGURED`.
+Common codes include `UNAUTHORIZED`, `FORBIDDEN`, `VALIDATION_FAILED`, `CART_EMPTY`, `CART_MODE_CONFLICT`, `MIXED_SHOP_CART`, `INSUFFICIENT_STOCK`, `OUT_OF_STOCK`, `NO_ELIGIBLE_SHOP`, `SHOP_CLOSED`, `OUTSIDE_DELIVERY_RADIUS`, `INVALID_STATUS_TRANSITION`, `CANCEL_NOT_ALLOWED`, `ORDER_NOT_FOUND`, `SHOP_NOT_FOUND`, `CONCURRENT_UPDATE`, `ONLINE_PAYMENT_NOT_CONFIGURED`, `NOT_AN_ONLINE_ORDER`, `PAYMENT_MISMATCH`, `PAYMENT_VERIFICATION_FAILED`, `PAYMENT_ALREADY_COMPLETED` and `PAYMENT_GATEWAY_ERROR`.
 
 ---
 
@@ -423,7 +547,7 @@ Happy path:
 PENDING → ACCEPTED → PREPARING → READY_FOR_PICKUP → OUT_FOR_DELIVERY → DELIVERED
 ```
 
-Alternative terminal states: `REJECTED`, `CANCELLED`, `PAYMENT_PENDING`, `PAYMENT_FAILED`.
+Online orders begin at `PAYMENT_PENDING` and join the happy path at `PENDING` once payment is verified. A failed attempt can move to `PAYMENT_FAILED` and be retried. Alternative terminal states: `REJECTED` and `CANCELLED`.
 
 Owner transitions:
 
@@ -436,6 +560,15 @@ Owner transitions:
 | `OUT_FOR_DELIVERY` | `DELIVERED` |
 
 Customers can cancel while `PENDING`, `ACCEPTED`, `PREPARING` or `PAYMENT_PENDING`. Admin cancellation is allowed until the order is delivered/cancelled/rejected. COD orders start with payment status `PENDING`, become `PAID` on delivery, and become `FAILED` or `REFUNDED` if cancelled depending on prior payment state.
+
+### Online payment rules
+- Stock is reserved when the `ONLINE` order is created, not when payment succeeds, so a slow payment cannot lose the items.
+- The Razorpay order id is bound to the order; verifying a payment against a different gateway order returns `PAYMENT_MISMATCH`.
+- `POST /payments/razorpay/verify` checks the HMAC signature before marking the order `PAID` and moving it from `PAYMENT_PENDING` to `PENDING`.
+- The webhook is idempotent and also handles `payment.failed` and refund events, in case the browser never calls verify.
+- Unpaid online orders are cancelled by a scheduled job after `PAYMENT_PENDING_TIMEOUT_MINUTES`; reserved stock is restored and the payment is marked `FAILED`.
+- Cancelling or rejecting a paid online order issues a best-effort refund; a gateway error is logged and never blocks the cancellation. Successful refunds set payment status `REFUNDED`.
+- `ONLINE` checkout returns `ONLINE_PAYMENT_NOT_CONFIGURED` only when neither real Razorpay keys nor `RAZORPAY_MOCK_ENABLED=true` are present.
 
 ### Identity and isolation
 - JWT is stateless; passwords are BCrypt-hashed.
@@ -452,7 +585,7 @@ Customers can cancel while `PENDING`, `ACCEPTED`, `PREPARING` or `PAYMENT_PENDIN
 - `flutter analyze` — no issues.
 - `flutter test` — 15 tests passed (model parsing and formatters).
 - `flutter build web --release` — succeeded.
-- Backend `mvnw test` — 10 integration tests passed against PostgreSQL.
+- Backend `mvnw test` — 12 integration tests passed against PostgreSQL, including mock Razorpay payment, signature rejection, in-app notification read state and refund-on-cancel.
 - Live API smoke checks against a running backend cover login, home, public shop inventory, admin dashboard, and the full Product Choice/Shop Choice checkout + cancellation path.
 
 ### Integration scenarios A–G
@@ -466,15 +599,17 @@ Customers can cancel while `PENDING`, `ACCEPTED`, `PREPARING` or `PAYMENT_PENDIN
 | **E** | A shop outside its delivery radius is never selected. |
 | **F** | Cross-customer order access and cross-shop owner operations are denied; unauthenticated cart access returns 401. |
 | **G** | When no shop can fulfil the cart, the response explains why and lists unavailable products with maximum available quantities. |
+| **H** | Mock Razorpay checkout: stock is reserved while payment is pending, a bad signature is rejected, success moves the order to `PENDING`/`PAID`, notifications are created and readable, and cancellation refunds and restores stock. |
 
-Additional integration coverage verifies the owner status lifecycle, invalid transition rejection, delivered COD payment state, and cancellation stock restoration.
+Additional integration coverage verifies the owner status lifecycle, invalid transition rejection, delivered COD payment state, cancellation stock restoration, and rejection of online payment attempts on COD orders.
 
 ---
 
 ## Assumptions and limitations
 
 - The brief mentioned a reference screenshot but none was attached. The UI follows the described green/white, quick-commerce aesthetic and is fully responsive, but is not a pixel match to an unseen reference.
-- Cash on Delivery is the only active payment method. The `ONLINE` enum and payment records exist, but online capture/refund is intentionally not implemented.
+- Razorpay works with real keys or the built-in mock mode. Live mode requires an HTTPS webhook endpoint and Razorpay's `checkout.js` to be reachable from the customer's browser.
+- Push notifications require Firebase credentials and, on web, a VAPID key and the configured service worker. Without them the in-app notification centre remains available.
 - Delivery partners can accept and complete ready orders; automatic assignment/route optimisation and live GPS tracking are future work.
 - Delivery distance is straight-line Haversine distance, not road-network distance.
 - Delivery pricing is a single flat rule (`₹19`, free from `₹199`) rather than per-shop or distance-based slabs.

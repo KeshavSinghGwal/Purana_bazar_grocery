@@ -382,6 +382,97 @@ class MarketplaceFlowIntegrationTest {
         assertEquals("FORBIDDEN", forbidden.get("code").asText());
     }
 
+    @Test
+    @Order(11)
+    @DisplayName("Online payment: mock Razorpay session, verification, notifications and refund")
+    void onlinePaymentFlow() throws Exception {
+        clearCart();
+        call("POST", "/api/cart/items", customerToken, Map.of(
+                "shoppingMode", "SHOP_CHOICE",
+                "shopInventoryId", invAProductB.getId(),
+                "quantity", 1), 201);
+        int stockBefore = inventoryRepository.findById(invAProductB.getId()).orElseThrow()
+                .getAvailableQuantity();
+
+        JsonNode order = createOrder("ONLINE", "it-online-" + System.nanoTime());
+        long orderId = order.get("id").asLong();
+        assertEquals("ONLINE", order.get("paymentMethod").asText());
+        assertEquals("PAYMENT_PENDING", order.get("orderStatus").asText());
+        assertEquals("PENDING", order.get("paymentStatus").asText());
+        assertTrue(order.get("canRetryPayment").asBoolean());
+        assertEquals(stockBefore - 1, inventoryRepository.findById(invAProductB.getId())
+                .orElseThrow().getAvailableQuantity(),
+                "Stock must be reserved while the online payment is pending");
+
+        JsonNode session = call("POST", "/api/payments/razorpay/order", customerToken,
+                Map.of("orderId", orderId), 200);
+        assertEquals("RAZORPAY", session.get("gateway").asText());
+        assertTrue(session.get("mock").asBoolean());
+        assertTrue(session.get("razorpayOrderId").asText().startsWith("order_mock_"));
+        assertEquals(order.get("totalAmount").decimalValue()
+                        .multiply(BigDecimal.valueOf(100)).longValueExact(),
+                session.get("amountPaise").asLong());
+
+        JsonNode rejected = call("POST", "/api/payments/razorpay/verify", customerToken, Map.of(
+                "orderId", orderId,
+                "razorpayOrderId", session.get("razorpayOrderId").asText(),
+                "razorpayPaymentId", "pay_mock_bad",
+                "razorpaySignature", "not-a-signature"), 409);
+        assertEquals("PAYMENT_VERIFICATION_FAILED", rejected.get("code").asText());
+
+        JsonNode paid = call("POST", "/api/payments/razorpay/verify", customerToken, Map.of(
+                "orderId", orderId,
+                "razorpayOrderId", session.get("razorpayOrderId").asText(),
+                "razorpayPaymentId", "pay_mock_test_123",
+                "razorpaySignature", "mock"), 200);
+        assertEquals("PENDING", paid.get("orderStatus").asText());
+        assertEquals("PAID", paid.get("paymentStatus").asText());
+
+        JsonNode paymentStatus = call("GET", "/api/payments/orders/" + orderId, customerToken, null, 200);
+        assertEquals("PAID", paymentStatus.get("paymentStatus").asText());
+        assertFalse(paymentStatus.get("retryable").asBoolean());
+        assertEquals("pay_mock_test_123", paymentStatus.get("gatewayPaymentId").asText());
+
+        JsonNode notifications = call("GET", "/api/notifications", customerToken, null, 200);
+        assertTrue(notifications.toString().contains("Payment successful"),
+                "A successful payment must create an in-app notification");
+        int unread = call("GET", "/api/notifications/unread-count", customerToken, null, 200)
+                .get("count").asInt();
+        assertTrue(unread > 0);
+        JsonNode unreadList = call("GET", "/api/notifications?unreadOnly=true", customerToken, null, 200);
+        long firstUnreadId = unreadList.get(0).get("id").asLong();
+        call("PUT", "/api/notifications/" + firstUnreadId + "/read", customerToken, null, 204);
+        assertEquals(unread - 1, call("GET", "/api/notifications/unread-count", customerToken, null, 200)
+                .get("count").asInt());
+
+        JsonNode cancelled = call("PUT", "/api/orders/" + orderId + "/cancel", customerToken,
+                Map.of("reason", "Testing the refund flow"), 200);
+        assertEquals("CANCELLED", cancelled.get("orderStatus").asText());
+        assertEquals("REFUNDED", cancelled.get("paymentStatus").asText());
+        assertEquals(stockBefore, inventoryRepository.findById(invAProductB.getId())
+                .orElseThrow().getAvailableQuantity(),
+                "Cancelling a paid order must restore reserved stock");
+    }
+
+    @Test
+    @Order(12)
+    @DisplayName("Online payment: a COD order cannot be charged online")
+    void onlinePaymentRejectsCodOrder() throws Exception {
+        clearCart();
+        call("POST", "/api/cart/items", customerToken, Map.of(
+                "shoppingMode", "SHOP_CHOICE",
+                "shopInventoryId", invAProductB.getId(),
+                "quantity", 1), 201);
+        JsonNode codOrder = createOrder("it-cod-online-" + System.nanoTime());
+
+        JsonNode error = call("POST", "/api/payments/razorpay/order", customerToken,
+                Map.of("orderId", codOrder.get("id").asLong()), 400);
+        assertEquals("NOT_AN_ONLINE_ORDER", error.get("code").asText());
+
+        call("PUT", "/api/orders/" + codOrder.get("id").asLong() + "/cancel", customerToken,
+                Map.of("reason", "Cleanup"), 200);
+    }
+
     // ---------------------------------------------------------------- helpers
 
     private User user(String name, String email, String phone, Role role) {
@@ -454,9 +545,13 @@ class MarketplaceFlowIntegrationTest {
     }
 
     private JsonNode createOrder(String idempotencyKey) throws Exception {
+        return createOrder("COD", idempotencyKey);
+    }
+
+    private JsonNode createOrder(String paymentMethod, String idempotencyKey) throws Exception {
         return call("POST", "/api/orders", customerToken, Map.of(
                 "addressId", address.getId(),
-                "paymentMethod", "COD",
+                "paymentMethod", paymentMethod,
                 "idempotencyKey", idempotencyKey), 201);
     }
 

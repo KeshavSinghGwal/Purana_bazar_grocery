@@ -6,6 +6,7 @@ import '../../core/formatters.dart';
 import '../../models/models.dart';
 import '../../widgets/cart_button.dart';
 import '../../widgets/common.dart';
+import '../../widgets/notification_button.dart';
 import 'order_details_screen.dart';
 
 class OrderHistoryScreen extends StatefulWidget {
@@ -76,7 +77,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('My orders'),
-        actions: const [CartButton(), SizedBox(width: 4)],
+        actions: const [NotificationButton(), CartButton(), SizedBox(width: 4)],
       ),
       body: SafeArea(
         child: PageWidth(

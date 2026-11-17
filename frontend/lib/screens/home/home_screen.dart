@@ -9,6 +9,7 @@ import '../../state/cart_provider.dart';
 import '../../state/location_provider.dart';
 import '../../widgets/cart_button.dart';
 import '../../widgets/common.dart';
+import '../../widgets/notification_button.dart';
 import '../location/addresses_screen.dart';
 import '../product/product_choice_screen.dart';
 import '../product/product_details_screen.dart';
@@ -120,6 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Row(
                   children: [
                     const Expanded(child: AppLogo(small: true)),
+                    const NotificationButton(),
                     const CartButton(),
                     const SizedBox(width: 2),
                   ],

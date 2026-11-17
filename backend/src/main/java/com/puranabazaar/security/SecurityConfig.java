@@ -47,6 +47,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**", "/api/shop-owner/register").permitAll()
+                        .requestMatchers("/api/payments/razorpay/webhook").permitAll()
                         .requestMatchers("/api/categories/**", "/api/marketplace/products/**",
                                 "/api/marketplace/search", "/api/marketplace/home",
                                 "/api/shops/**", "/actuator/health", "/error").permitAll()

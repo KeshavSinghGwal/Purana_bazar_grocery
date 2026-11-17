@@ -11,6 +11,10 @@ import 'screens/splash_screen.dart';
 import 'state/auth_provider.dart';
 import 'widgets/common.dart';
 
+/// Used by foreground FCM handlers to show a snackbar from outside the widget tree.
+final GlobalKey<ScaffoldMessengerState> appMessengerKey =
+    GlobalKey<ScaffoldMessengerState>();
+
 class PuranaBazaarApp extends StatelessWidget {
   const PuranaBazaarApp({super.key});
 
@@ -20,6 +24,7 @@ class PuranaBazaarApp extends StatelessWidget {
       title: 'Purana Bazaar',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
+      scaffoldMessengerKey: appMessengerKey,
       home: const AuthGate(),
     );
   }

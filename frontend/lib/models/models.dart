@@ -608,6 +608,9 @@ class Order {
     required this.canCancel,
     this.createdAt,
     this.updatedAt,
+    this.paymentReference,
+    this.paymentGateway,
+    this.canRetryPayment = false,
   });
 
   final int id;
@@ -633,9 +636,14 @@ class Order {
   final bool canCancel;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final String? paymentReference;
+  final String? paymentGateway;
+  final bool canRetryPayment;
 
   bool get isDelivered => orderStatus == 'DELIVERED';
   bool get isCancelled => orderStatus == 'CANCELLED' || orderStatus == 'REJECTED';
+  bool get isAwaitingPayment =>
+      orderStatus == 'PAYMENT_PENDING' || orderStatus == 'PAYMENT_FAILED';
 
   factory Order.fromJson(Map<String, dynamic> json) => Order(
         id: _int(json['id']),
@@ -661,6 +669,54 @@ class Order {
         canCancel: _bool(json['canCancel']),
         createdAt: _date(json['createdAt']),
         updatedAt: _date(json['updatedAt']),
+        paymentReference: _stringOrNull(json['paymentReference']),
+        paymentGateway: _stringOrNull(json['paymentGateway']),
+        canRetryPayment: _bool(json['canRetryPayment']),
+      );
+}
+
+class AppNotificationItem {
+  const AppNotificationItem({
+    required this.id,
+    required this.title,
+    required this.body,
+    required this.type,
+    this.orderId,
+    this.orderNumber,
+    required this.read,
+    this.createdAt,
+  });
+
+  final int id;
+  final String title;
+  final String body;
+  final String type;
+  final int? orderId;
+  final String? orderNumber;
+  final bool read;
+  final DateTime? createdAt;
+
+  AppNotificationItem copyWith({bool? read}) => AppNotificationItem(
+        id: id,
+        title: title,
+        body: body,
+        type: type,
+        orderId: orderId,
+        orderNumber: orderNumber,
+        read: read ?? this.read,
+        createdAt: createdAt,
+      );
+
+  factory AppNotificationItem.fromJson(Map<String, dynamic> json) =>
+      AppNotificationItem(
+        id: _int(json['id']),
+        title: _string(json['title']),
+        body: _string(json['body']),
+        type: _string(json['type']),
+        orderId: json['orderId'] == null ? null : _int(json['orderId']),
+        orderNumber: _stringOrNull(json['orderNumber']),
+        read: _bool(json['read']),
+        createdAt: _date(json['createdAt']),
       );
 }
 

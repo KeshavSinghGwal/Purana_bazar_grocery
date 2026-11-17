@@ -168,6 +168,77 @@
     For more details:
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
+  <script>
+    // Lazily loads Razorpay Checkout the first time a customer pays online.
+    // The helper returns a Promise so Dart can await the final outcome.
+    (function () {
+      var loading = null;
+
+      function loadCheckout() {
+        if (window.Razorpay) return Promise.resolve(true);
+        if (loading) return loading;
+        loading = new Promise(function (resolve) {
+          var script = document.createElement('script');
+          script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+          script.async = true;
+          script.onload = function () { resolve(true); };
+          script.onerror = function () { resolve(false); };
+          document.head.appendChild(script);
+        });
+        return loading;
+      }
+
+      window.pbStartRazorpay = function (options) {
+        return loadCheckout().then(function (loaded) {
+          if (!loaded || !window.Razorpay) {
+            return {
+              ok: false,
+              error: 'Could not load Razorpay Checkout. Check your internet connection and try again.'
+            };
+          }
+          return new Promise(function (resolve) {
+            var settled = false;
+            function finish(result) {
+              if (settled) return;
+              settled = true;
+              resolve(result);
+            }
+            try {
+              var checkout = new window.Razorpay({
+                key: options.key,
+                amount: options.amount,
+                currency: options.currency || 'INR',
+                name: options.name || 'Purana Bazaar',
+                description: options.description || '',
+                order_id: options.order_id,
+                prefill: options.prefill || {},
+                notes: options.notes || {},
+                theme: options.theme || { color: '#0c831f' },
+                handler: function (response) {
+                  finish({
+                    ok: true,
+                    razorpay_payment_id: response.razorpay_payment_id,
+                    razorpay_order_id: response.razorpay_order_id,
+                    razorpay_signature: response.razorpay_signature
+                  });
+                },
+                modal: {
+                  ondismiss: function () { finish({ ok: false, cancelled: true }); }
+                }
+              });
+              checkout.on('payment.failed', function (response) {
+                var description = response && response.error && response.error.description;
+                finish({ ok: false, error: description || 'The payment failed. Please try again.' });
+              });
+              checkout.open();
+            } catch (error) {
+              finish({ ok: false, error: String(error && error.message ? error.message : error) });
+            }
+          });
+        });
+      };
+    })();
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>
