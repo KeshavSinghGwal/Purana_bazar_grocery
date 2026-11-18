@@ -9,12 +9,14 @@ import '../../state/cart_provider.dart';
 import '../../state/location_provider.dart';
 import '../../widgets/cart_button.dart';
 import '../../widgets/common.dart';
+import '../../widgets/language_selector.dart';
 import '../../widgets/notification_button.dart';
 import '../../state/notification_provider.dart';
 import '../location/addresses_screen.dart';
 import '../notifications/notifications_screen.dart';
 import '../orders/order_history_screen.dart';
 import '../wishlist/wishlist_screen.dart';
+import '../../core/localization.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -26,7 +28,7 @@ class ProfileScreen extends StatelessWidget {
     final saved = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Edit profile'),
+        title: const AppText('Edit profile'),
         content: Form(
           key: formKey,
           child: Column(
@@ -34,7 +36,7 @@ class ProfileScreen extends StatelessWidget {
             children: [
               TextFormField(
                 controller: name,
-                decoration: const InputDecoration(labelText: 'Full name'),
+                decoration: InputDecoration(labelText: tr(context, 'Full name')),
                 validator: (value) =>
                     value == null || value.trim().length < 2 ? 'Enter your name' : null,
               ),
@@ -42,7 +44,7 @@ class ProfileScreen extends StatelessWidget {
               TextFormField(
                 controller: phone,
                 keyboardType: TextInputType.phone,
-                decoration: const InputDecoration(labelText: 'Phone number'),
+                decoration: InputDecoration(labelText: tr(context, 'Phone number')),
               ),
             ],
           ),
@@ -50,13 +52,13 @@ class ProfileScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: const AppText('Cancel'),
           ),
           ElevatedButton(
             onPressed: () {
               if (formKey.currentState!.validate()) Navigator.pop(context, true);
             },
-            child: const Text('Save'),
+            child: const AppText('Save'),
           ),
         ],
       ),
@@ -85,16 +87,16 @@ class ProfileScreen extends StatelessWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Sign out?'),
-        content: const Text('Your cart and selected address will be cleared from this device.'),
+        title: const AppText('Sign out?'),
+        content: const AppText('Your cart and selected address will be cleared from this device.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Stay'),
+            child: const AppText('Stay'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Sign out', style: TextStyle(color: AppColors.red)),
+            child: const AppText('Sign out', style: TextStyle(color: AppColors.red)),
           ),
         ],
       ),
@@ -112,7 +114,7 @@ class ProfileScreen extends StatelessWidget {
     final user = auth.user;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: const AppText('Profile'),
         actions: const [
           NotificationButton(),
           CartButton(),
@@ -136,7 +138,7 @@ class ProfileScreen extends StatelessWidget {
                     CircleAvatar(
                       radius: 31,
                       backgroundColor: Colors.white.withValues(alpha: 0.18),
-                      child: Text(
+                      child: AppText(
                         initials(user?.name ?? 'Purana Bazaar'),
                         style: const TextStyle(
                           color: Colors.white,
@@ -150,7 +152,7 @@ class ProfileScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          AppText(
                             user?.name ?? 'Customer',
                             style: const TextStyle(
                               color: Colors.white,
@@ -160,7 +162,7 @@ class ProfileScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 3),
-                          Text(
+                          AppText(
                             user?.email ?? '',
                             style: TextStyle(
                               color: Colors.white.withValues(alpha: 0.78),
@@ -169,7 +171,7 @@ class ProfileScreen extends StatelessWidget {
                           ),
                           if (user?.phone != null) ...[
                             const SizedBox(height: 1),
-                            Text(
+                            AppText(
                               user!.phone!,
                               style: TextStyle(
                                 color: Colors.white.withValues(alpha: 0.78),
@@ -250,6 +252,13 @@ class ProfileScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 18),
+              _sectionLabel(context, 'GENERAL'),
+              const SizedBox(height: 8),
+              const AppCard(
+                padding: EdgeInsets.zero,
+                child: LanguageTile(),
+              ),
+              const SizedBox(height: 18),
               _sectionLabel(context, 'ABOUT'),
               const SizedBox(height: 8),
               AppCard(
@@ -276,11 +285,11 @@ class ProfileScreen extends StatelessWidget {
               OutlinedButton.icon(
                 onPressed: () => _logout(context),
                 icon: const Icon(Icons.logout_rounded, size: 18, color: AppColors.red),
-                label: const Text('Sign out', style: TextStyle(color: AppColors.red)),
+                label: const AppText('Sign out', style: TextStyle(color: AppColors.red)),
               ),
               const SizedBox(height: 12),
               const Center(
-                child: Text(
+                child: AppText(
                   'Purana Bazaar · Neighbourhood grocery marketplace',
                   style: TextStyle(fontSize: 10, color: AppColors.soft),
                 ),
@@ -292,7 +301,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _sectionLabel(BuildContext context, String label) => Text(
+  Widget _sectionLabel(BuildContext context, String label) => AppText(
         label,
         style: const TextStyle(
           fontSize: 9,
@@ -321,11 +330,11 @@ class ProfileScreen extends StatelessWidget {
           ),
           child: Icon(icon, color: AppColors.green, size: 20),
         ),
-        title: Text(
+        title: AppText(
           title,
           style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w700),
         ),
-        subtitle: Text(
+        subtitle: AppText(
           subtitle,
           style: const TextStyle(fontSize: 10.5, color: AppColors.muted),
         ),
@@ -363,7 +372,7 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 20),
             const AppLogo(small: true),
             const SizedBox(height: 18),
-            Text('Two ways to shop', style: Theme.of(context).textTheme.headlineSmall),
+            AppText('Two ways to shop', style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 12),
             const _AboutPoint(
               icon: Icons.auto_awesome_rounded,
@@ -390,7 +399,7 @@ class ProfileScreen extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Got it'),
+                child: const AppText('Got it'),
               ),
             ),
           ],
@@ -403,15 +412,15 @@ class ProfileScreen extends StatelessWidget {
     showDialog<void>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Help & support'),
-        content: const Text(
+        title: const AppText('Help & support'),
+        content: const AppText(
           'For demo support, contact support@puranabazaar.com. You can cancel orders in Pending, Accepted or Preparing states from the order details screen. Delivered orders can be reviewed.',
           style: TextStyle(fontSize: 13, height: 1.5),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+            child: const AppText('Close'),
           ),
         ],
       ),
@@ -445,9 +454,9 @@ class _AboutPoint extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800)),
+              AppText(title, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800)),
               const SizedBox(height: 2),
-              Text(
+              AppText(
                 text,
                 style: const TextStyle(fontSize: 11.5, height: 1.45, color: AppColors.muted),
               ),

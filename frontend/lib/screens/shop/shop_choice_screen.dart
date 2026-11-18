@@ -9,6 +9,7 @@ import '../../widgets/cart_button.dart';
 import '../../widgets/common.dart';
 import '../location/addresses_screen.dart';
 import 'shop_details_screen.dart';
+import '../../core/localization.dart';
 
 class ShopChoiceScreen extends StatefulWidget {
   const ShopChoiceScreen({super.key});
@@ -114,7 +115,7 @@ class _ShopChoiceScreenState extends State<ShopChoiceScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Shop Choice'),
+        title: const AppText('Shop Choice'),
         actions: const [CartButton(), SizedBox(width: 4)],
       ),
       body: SafeArea(
@@ -143,7 +144,7 @@ class _ShopChoiceScreenState extends State<ShopChoiceScreen> {
                                   color: AppColors.green, size: 18),
                               const SizedBox(width: 8),
                               Expanded(
-                                child: Text(
+                                child: AppText(
                                   address == null
                                       ? 'Set a delivery address to see shops'
                                       : 'Delivering to ${address.label} · ${address.formattedAddress}',
@@ -166,7 +167,7 @@ class _ShopChoiceScreenState extends State<ShopChoiceScreen> {
                         controller: _search,
                         onChanged: (value) => setState(() => _query = value),
                         decoration: InputDecoration(
-                          hintText: 'Search a shop, area or category…',
+                          hintText: tr(context, 'Search a shop, area or category…'),
                           prefixIcon: const Icon(Icons.search_rounded, size: 21),
                           suffixIcon: _query.isEmpty
                               ? null
@@ -204,7 +205,7 @@ class _ShopChoiceScreenState extends State<ShopChoiceScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
+                                  AppText(
                                     'You choose the shop',
                                     style: TextStyle(
                                       fontSize: 13,
@@ -213,7 +214,7 @@ class _ShopChoiceScreenState extends State<ShopChoiceScreen> {
                                     ),
                                   ),
                                   SizedBox(height: 2),
-                                  Text(
+                                  AppText(
                                     'Your cart stays with this shop. We only show distance and delivery eligibility.',
                                     style: TextStyle(
                                       fontSize: 10.5,
@@ -232,7 +233,7 @@ class _ShopChoiceScreenState extends State<ShopChoiceScreen> {
                           padding: const EdgeInsets.only(top: 10, bottom: 2),
                           child: Row(
                             children: [
-                              Text(
+                              AppText(
                                 address == null
                                     ? '${filtered.length} approved shops'
                                     : '${filtered.length} shops can deliver here',
@@ -246,7 +247,7 @@ class _ShopChoiceScreenState extends State<ShopChoiceScreen> {
                               const Icon(Icons.near_me_outlined,
                                   size: 14, color: AppColors.muted),
                               const SizedBox(width: 3),
-                              const Text(
+                              const AppText(
                                 'Nearest first',
                                 style: TextStyle(fontSize: 10.5, color: AppColors.muted),
                               ),

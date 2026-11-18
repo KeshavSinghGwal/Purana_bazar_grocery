@@ -5,6 +5,7 @@ import '../../core/app_theme.dart';
 import '../../core/formatters.dart';
 import '../../models/models.dart';
 import '../../widgets/common.dart';
+import '../../core/localization.dart';
 
 class AdminOrdersScreen extends StatefulWidget {
   const AdminOrdersScreen({super.key});
@@ -96,11 +97,11 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Cancel ${order.orderNumber}?'),
+        title: AppText('Cancel ${order.orderNumber}?'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
+            const AppText(
               'The customer will see this order as cancelled and reserved stock will be returned to the shop.',
               style: TextStyle(fontSize: 12, color: AppColors.muted),
             ),
@@ -109,9 +110,9 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
               controller: controller,
               maxLines: 2,
               textCapitalization: TextCapitalization.sentences,
-              decoration: const InputDecoration(
-                labelText: 'Reason',
-                hintText: 'Why is this order being cancelled?',
+              decoration: InputDecoration(
+                labelText: tr(context, 'Reason'),
+                hintText: tr(context, 'Why is this order being cancelled?'),
               ),
             ),
           ],
@@ -119,11 +120,11 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Keep order'),
+            child: const AppText('Keep order'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Cancel order', style: TextStyle(color: AppColors.red)),
+            child: const AppText('Cancel order', style: TextStyle(color: AppColors.red)),
           ),
         ],
       ),
@@ -156,10 +157,10 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
     final filtered = _filtered;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('All orders'),
+        title: const AppText('All orders'),
         actions: [
           IconButton(
-            tooltip: 'Refresh',
+            tooltip: context.tr('Refresh'),
             onPressed: _load,
             icon: const Icon(Icons.refresh_rounded),
           ),
@@ -193,7 +194,7 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                                     (filter) => Padding(
                                       padding: const EdgeInsets.only(right: 7),
                                       child: ChoiceChip(
-                                        label: Text(filter),
+                                        label: AppText(filter),
                                         selected: _filter == filter,
                                         onSelected: (_) =>
                                             setState(() => _filter = filter),
@@ -257,7 +258,7 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    AppText(
                       order.orderNumber,
                       style: const TextStyle(
                         fontSize: 12.5,
@@ -265,7 +266,7 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                       ),
                     ),
                     const SizedBox(height: 2),
-                    Text(
+                    AppText(
                       '${order.customerName} · ${order.shop.name}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -280,7 +281,7 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                 children: [
                   StatusPill(status: order.orderStatus),
                   const SizedBox(height: 3),
-                  Text(
+                  AppText(
                     rupee(order.totalAmount),
                     style: const TextStyle(
                       fontSize: 11.5,
@@ -296,14 +297,14 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
             children: [
               const Icon(Icons.shopping_bag_outlined, size: 13, color: AppColors.muted),
               const SizedBox(width: 4),
-              Text(
+              AppText(
                 '${order.items.length} item${order.items.length == 1 ? '' : 's'}',
                 style: const TextStyle(fontSize: 10, color: AppColors.muted),
               ),
               const SizedBox(width: 12),
               const Icon(Icons.schedule_rounded, size: 13, color: AppColors.muted),
               const SizedBox(width: 4),
-              Text(
+              AppText(
                 compactDate(order.createdAt),
                 style: const TextStyle(fontSize: 10, color: AppColors.muted),
               ),
@@ -317,7 +318,7 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
               else if (_activeStatuses.contains(order.orderStatus))
                 TextButton(
                   onPressed: () => _cancel(order),
-                  child: const Text(
+                  child: const AppText(
                     'Cancel',
                     style: TextStyle(fontSize: 11, color: AppColors.red),
                   ),
@@ -359,7 +360,7 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: Text(
+                    child: AppText(
                       order.orderNumber,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
@@ -368,7 +369,7 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                 ],
               ),
               const SizedBox(height: 5),
-              Text(
+              AppText(
                 '${order.customerName}${order.customerPhone == null ? '' : ' · ${order.customerPhone}'}',
                 style: const TextStyle(fontSize: 11.5, color: AppColors.muted),
               ),
@@ -383,7 +384,7 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    AppText(
                       order.shop.name,
                       style: const TextStyle(
                         fontSize: 12.5,
@@ -391,7 +392,7 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                       ),
                     ),
                     const SizedBox(height: 3),
-                    Text(
+                    AppText(
                       order.deliveryAddress,
                       style: const TextStyle(
                         fontSize: 11,
@@ -409,12 +410,12 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                   child: Row(
                     children: [
                       Expanded(
-                        child: Text(
+                        child: AppText(
                           '${item.productName} × ${item.quantity}',
                           style: const TextStyle(fontSize: 12),
                         ),
                       ),
-                      Text(
+                      AppText(
                         rupee(item.totalPrice),
                         style: const TextStyle(
                           fontSize: 12,
@@ -450,7 +451,7 @@ class _AdminOrdersScreenState extends State<AdminOrdersScreen> {
                       _cancel(order);
                     },
                     icon: const Icon(Icons.cancel_outlined, size: 17),
-                    label: const Text('Cancel this order'),
+                    label: const AppText('Cancel this order'),
                     style: OutlinedButton.styleFrom(foregroundColor: AppColors.red),
                   ),
                 ),

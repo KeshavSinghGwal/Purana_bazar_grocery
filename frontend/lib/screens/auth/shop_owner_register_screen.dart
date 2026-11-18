@@ -6,6 +6,7 @@ import '../../core/app_theme.dart';
 import '../../core/formatters.dart';
 import '../../state/auth_provider.dart';
 import '../../widgets/common.dart';
+import '../../core/localization.dart';
 
 class ShopOwnerRegisterScreen extends StatefulWidget {
   const ShopOwnerRegisterScreen({super.key});
@@ -124,7 +125,7 @@ class _ShopOwnerRegisterScreenState extends State<ShopOwnerRegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Register your shop')),
+      appBar: AppBar(title: const AppText('Register your shop')),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 34),
@@ -152,7 +153,7 @@ class _ShopOwnerRegisterScreenState extends State<ShopOwnerRegisterScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
+                                AppText(
                                   'Partner with Purana Bazaar',
                                   style: TextStyle(
                                     color: Colors.white,
@@ -161,7 +162,7 @@ class _ShopOwnerRegisterScreenState extends State<ShopOwnerRegisterScreen> {
                                   ),
                                 ),
                                 SizedBox(height: 5),
-                                Text(
+                                AppText(
                                   'New shops go live after an administrator checks your details. You can set up inventory right away.',
                                   style: TextStyle(
                                     color: Colors.white70,
@@ -185,14 +186,14 @@ class _ShopOwnerRegisterScreenState extends State<ShopOwnerRegisterScreen> {
                           TextFormField(
                             controller: _name,
                             textCapitalization: TextCapitalization.words,
-                            decoration: const InputDecoration(labelText: 'Your full name'),
+                            decoration: InputDecoration(labelText: tr(context, 'Your full name')),
                             validator: _required,
                           ),
                           const SizedBox(height: 13),
                           TextFormField(
                             controller: _email,
                             keyboardType: TextInputType.emailAddress,
-                            decoration: const InputDecoration(labelText: 'Email address'),
+                            decoration: InputDecoration(labelText: tr(context, 'Email address')),
                             validator: (value) =>
                                 value == null || !value.contains('@') ? 'Enter a valid email' : null,
                           ),
@@ -200,7 +201,7 @@ class _ShopOwnerRegisterScreenState extends State<ShopOwnerRegisterScreen> {
                           TextFormField(
                             controller: _phone,
                             keyboardType: TextInputType.phone,
-                            decoration: const InputDecoration(labelText: 'Phone number'),
+                            decoration: InputDecoration(labelText: tr(context, 'Phone number')),
                             validator: _required,
                           ),
                           const SizedBox(height: 13),
@@ -208,8 +209,8 @@ class _ShopOwnerRegisterScreenState extends State<ShopOwnerRegisterScreen> {
                             controller: _password,
                             obscureText: _obscure,
                             decoration: InputDecoration(
-                              labelText: 'Password',
-                              helperText: 'At least 8 characters',
+                              labelText: tr(context, 'Password'),
+                              helperText: tr(context, 'At least 8 characters'),
                               suffixIcon: IconButton(
                                 onPressed: () => setState(() => _obscure = !_obscure),
                                 icon: Icon(_obscure
@@ -234,15 +235,15 @@ class _ShopOwnerRegisterScreenState extends State<ShopOwnerRegisterScreen> {
                           TextFormField(
                             controller: _shopName,
                             textCapitalization: TextCapitalization.words,
-                            decoration: const InputDecoration(labelText: 'Shop name'),
+                            decoration: InputDecoration(labelText: tr(context, 'Shop name')),
                             validator: _required,
                           ),
                           const SizedBox(height: 13),
                           TextFormField(
                             controller: _description,
                             maxLines: 3,
-                            decoration: const InputDecoration(
-                              labelText: 'Short description',
+                            decoration: InputDecoration(
+                              labelText: tr(context, 'Short description'),
                               alignLabelWithHint: true,
                             ),
                           ),
@@ -250,8 +251,8 @@ class _ShopOwnerRegisterScreenState extends State<ShopOwnerRegisterScreen> {
                           TextFormField(
                             controller: _address,
                             maxLines: 2,
-                            decoration: const InputDecoration(
-                              labelText: 'Full shop address',
+                            decoration: InputDecoration(
+                              labelText: tr(context, 'Full shop address'),
                               alignLabelWithHint: true,
                             ),
                             validator: _required,
@@ -259,11 +260,11 @@ class _ShopOwnerRegisterScreenState extends State<ShopOwnerRegisterScreen> {
                           const SizedBox(height: 13),
                           DropdownButtonFormField<String>(
                             initialValue: _category,
-                            decoration: const InputDecoration(labelText: 'Shop category'),
+                            decoration: InputDecoration(labelText: tr(context, 'Shop category')),
                             items: _categories
                                 .map((category) => DropdownMenuItem(
                                       value: category,
-                                      child: Text(category),
+                                      child: AppText(category),
                                     ))
                                 .toList(),
                             onChanged: (value) {
@@ -274,8 +275,8 @@ class _ShopOwnerRegisterScreenState extends State<ShopOwnerRegisterScreen> {
                           TextFormField(
                             controller: _shopPhone,
                             keyboardType: TextInputType.phone,
-                            decoration: const InputDecoration(
-                              labelText: 'Shop phone (optional)',
+                            decoration: InputDecoration(
+                              labelText: tr(context, 'Shop phone (optional)'),
                             ),
                           ),
                         ],
@@ -295,7 +296,7 @@ class _ShopOwnerRegisterScreenState extends State<ShopOwnerRegisterScreen> {
                                   controller: _latitude,
                                   keyboardType:
                                       const TextInputType.numberWithOptions(decimal: true),
-                                  decoration: const InputDecoration(labelText: 'Latitude'),
+                                  decoration: InputDecoration(labelText: tr(context, 'Latitude')),
                                   validator: (value) => double.tryParse(value ?? '') == null
                                       ? 'Enter a valid latitude'
                                       : null,
@@ -307,7 +308,7 @@ class _ShopOwnerRegisterScreenState extends State<ShopOwnerRegisterScreen> {
                                   controller: _longitude,
                                   keyboardType:
                                       const TextInputType.numberWithOptions(decimal: true),
-                                  decoration: const InputDecoration(labelText: 'Longitude'),
+                                  decoration: InputDecoration(labelText: tr(context, 'Longitude')),
                                   validator: (value) => double.tryParse(value ?? '') == null
                                       ? 'Enter a valid longitude'
                                       : null,
@@ -319,14 +320,14 @@ class _ShopOwnerRegisterScreenState extends State<ShopOwnerRegisterScreen> {
                           TextFormField(
                             controller: _radius,
                             keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                            decoration: const InputDecoration(
-                              labelText: 'Delivery radius (km)',
-                              helperText: 'Minimum 0.5 km, maximum 50 km',
+                            decoration: InputDecoration(
+                              labelText: tr(context, 'Delivery radius (km)'),
+                              helperText: tr(context, 'Minimum 0.5 km, maximum 50 km'),
                             ),
                             validator: (value) {
                               final radius = double.tryParse(value ?? '');
                               if (radius == null || radius < 0.5 || radius > 50) {
-                                return 'Enter a radius between 0.5 and 50';
+                                return AppLocalizations.current.tr('Enter a radius between 0.5 and 50');
                               }
                               return null;
                             },
@@ -370,12 +371,12 @@ class _ShopOwnerRegisterScreenState extends State<ShopOwnerRegisterScreen> {
                                   color: Colors.white,
                                 ),
                               )
-                            : const Text('Submit shop for approval'),
+                            : const AppText('Submit shop for approval'),
                       ),
                     ),
                     const SizedBox(height: 10),
                     const Center(
-                      child: Text(
+                      child: AppText(
                         'Your shop will remain hidden from customers until approved.',
                         style: TextStyle(fontSize: 11, color: AppColors.muted),
                       ),
@@ -390,7 +391,7 @@ class _ShopOwnerRegisterScreenState extends State<ShopOwnerRegisterScreen> {
     );
   }
 
-  Widget _sectionTitle(BuildContext context, String title) => Text(
+  Widget _sectionTitle(BuildContext context, String title) => AppText(
         title,
         style: Theme.of(context).textTheme.titleMedium,
       );
@@ -405,10 +406,10 @@ class _ShopOwnerRegisterScreenState extends State<ShopOwnerRegisterScreen> {
       borderRadius: BorderRadius.circular(14),
       child: InputDecorator(
         decoration: InputDecoration(
-          labelText: label,
+          labelText: tr(context, label),
           suffixIcon: const Icon(Icons.schedule_rounded, size: 20),
         ),
-        child: Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
+        child: AppText(value, style: const TextStyle(fontWeight: FontWeight.w600)),
       ),
     );
   }

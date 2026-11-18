@@ -5,6 +5,7 @@ import '../../core/app_theme.dart';
 import '../../core/formatters.dart';
 import '../../models/models.dart';
 import '../../widgets/common.dart';
+import '../../core/localization.dart';
 
 class OwnerInventoryScreen extends StatefulWidget {
   const OwnerInventoryScreen({super.key});
@@ -113,18 +114,18 @@ class _OwnerInventoryScreenState extends State<OwnerInventoryScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Add a catalog product',
+                      AppText('Add a catalog product',
                           style: Theme.of(context).textTheme.titleLarge),
                       const SizedBox(height: 4),
-                      const Text(
+                      const AppText(
                         'Choose a product, then set your shop price and stock.',
                         style: TextStyle(fontSize: 11.5, color: AppColors.muted),
                       ),
                       const SizedBox(height: 12),
                       TextField(
                         onChanged: (value) => setSheetState(() => query = value),
-                        decoration: const InputDecoration(
-                          hintText: 'Search catalog products…',
+                        decoration: InputDecoration(
+                          hintText: tr(context, 'Search catalog products…'),
                           prefixIcon: Icon(Icons.search_rounded, size: 20),
                         ),
                       ),
@@ -153,14 +154,14 @@ class _OwnerInventoryScreenState extends State<OwnerInventoryScreen> {
                                 height: 46,
                                 radius: 9,
                               ),
-                              title: Text(
+                              title: AppText(
                                 product.name,
                                 style: const TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w700,
                                 ),
                               ),
-                              subtitle: Text(
+                              subtitle: AppText(
                                 '${product.unit} · ${product.categoryName}',
                                 style: const TextStyle(fontSize: 10.5),
                               ),
@@ -196,7 +197,7 @@ class _OwnerInventoryScreenState extends State<OwnerInventoryScreen> {
       barrierDismissible: false,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: Text(isEdit ? 'Edit listing' : 'Add listing'),
+          title: AppText(isEdit ? 'Edit listing' : 'Add listing'),
           content: Form(
             key: formKey,
             child: SingleChildScrollView(
@@ -204,7 +205,7 @@ class _OwnerInventoryScreenState extends State<OwnerInventoryScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  AppText(
                     isEdit ? existing.productName : product!.name,
                     style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800),
                   ),
@@ -212,14 +213,14 @@ class _OwnerInventoryScreenState extends State<OwnerInventoryScreen> {
                   TextFormField(
                     controller: price,
                     keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                    decoration: const InputDecoration(
-                      labelText: 'Selling price (₹)',
-                      prefixText: '₹ ',
+                    decoration: InputDecoration(
+                      labelText: tr(context, 'Selling price (₹)'),
+                      prefixText: tr(context, '₹ '),
                     ),
                     validator: (value) {
                       final parsed = double.tryParse(value?.trim() ?? '');
                       if (parsed == null || parsed < 0.01) {
-                        return 'Enter a valid price';
+                        return AppLocalizations.current.tr('Enter a valid price');
                       }
                       return null;
                     },
@@ -228,11 +229,11 @@ class _OwnerInventoryScreenState extends State<OwnerInventoryScreen> {
                   TextFormField(
                     controller: quantity,
                     keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(labelText: 'Available quantity'),
+                    decoration: InputDecoration(labelText: tr(context, 'Available quantity')),
                     validator: (value) {
                       final parsed = int.tryParse(value?.trim() ?? '');
                       if (parsed == null || parsed < 0 || parsed > 100000) {
-                        return 'Enter 0–100000';
+                        return AppLocalizations.current.tr('Enter 0–100000');
                       }
                       return null;
                     },
@@ -241,7 +242,7 @@ class _OwnerInventoryScreenState extends State<OwnerInventoryScreen> {
                   SwitchListTile.adaptive(
                     contentPadding: EdgeInsets.zero,
                     activeTrackColor: AppColors.green,
-                    title: const Text(
+                    title: const AppText(
                       'Listing active',
                       style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
                     ),
@@ -255,7 +256,7 @@ class _OwnerInventoryScreenState extends State<OwnerInventoryScreen> {
           actions: [
             TextButton(
               onPressed: busy ? null : () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: const AppText('Cancel'),
             ),
             ElevatedButton(
               onPressed: busy
@@ -301,7 +302,7 @@ class _OwnerInventoryScreenState extends State<OwnerInventoryScreen> {
                         color: Colors.white,
                       ),
                     )
-                  : Text(isEdit ? 'Save changes' : 'Add listing'),
+                  : AppText(isEdit ? 'Save changes' : 'Add listing'),
             ),
           ],
         ),
@@ -316,18 +317,18 @@ class _OwnerInventoryScreenState extends State<OwnerInventoryScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Remove listing?'),
-        content: Text(
+        title: const AppText('Remove listing?'),
+        content: AppText(
           '${item.productName} will be hidden from customers and its stock will be set to zero. Existing orders are not affected.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Keep'),
+            child: const AppText('Keep'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Remove', style: TextStyle(color: AppColors.red)),
+            child: const AppText('Remove', style: TextStyle(color: AppColors.red)),
           ),
         ],
       ),
@@ -354,10 +355,10 @@ class _OwnerInventoryScreenState extends State<OwnerInventoryScreen> {
         .length;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Shop inventory'),
+        title: const AppText('Shop inventory'),
         actions: [
           IconButton(
-            tooltip: 'Refresh',
+            tooltip: context.tr('Refresh'),
             onPressed: _load,
             icon: const Icon(Icons.refresh_rounded),
           ),
@@ -374,7 +375,7 @@ class _OwnerInventoryScreenState extends State<OwnerInventoryScreen> {
                 child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
               )
             : const Icon(Icons.add_rounded),
-        label: const Text('Add listing'),
+        label: const AppText('Add listing'),
       ),
       body: SafeArea(
         child: PageWidth(
@@ -456,11 +457,11 @@ class _OwnerInventoryScreenState extends State<OwnerInventoryScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              AppText(
                 value,
                 style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w900),
               ),
-              Text(label, style: const TextStyle(fontSize: 9.5, color: AppColors.muted)),
+              AppText(label, style: const TextStyle(fontSize: 9.5, color: AppColors.muted)),
             ],
           ),
         ],
@@ -484,7 +485,7 @@ class _OwnerInventoryScreenState extends State<OwnerInventoryScreen> {
                 Row(
                   children: [
                     Expanded(
-                      child: Text(
+                      child: AppText(
                         item.productName,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
@@ -499,14 +500,14 @@ class _OwnerInventoryScreenState extends State<OwnerInventoryScreen> {
                   ],
                 ),
                 const SizedBox(height: 2),
-                Text(
+                AppText(
                   '${item.unit} · ${item.categoryName}',
                   style: const TextStyle(fontSize: 10, color: AppColors.muted),
                 ),
                 const SizedBox(height: 7),
                 Row(
                   children: [
-                    Text(
+                    AppText(
                       rupee(item.price),
                       style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900),
                     ),
@@ -521,7 +522,7 @@ class _OwnerInventoryScreenState extends State<OwnerInventoryScreen> {
                                 : AppColors.paleMint,
                         borderRadius: BorderRadius.circular(7),
                       ),
-                      child: Text(
+                      child: AppText(
                         item.availableQuantity == 0
                             ? 'Out of stock'
                             : '${item.availableQuantity} in stock',

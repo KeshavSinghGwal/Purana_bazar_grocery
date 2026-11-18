@@ -8,6 +8,7 @@ import '../../models/models.dart';
 import '../../state/cart_provider.dart';
 import '../../widgets/cart_button.dart';
 import '../../widgets/common.dart';
+import '../../core/localization.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
   const ProductDetailsScreen({
@@ -98,7 +99,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Product details'),
+        title: const AppText('Product details'),
         actions: [
           IconButton(
             tooltip: _wishlisted ? 'Remove from wishlist' : 'Save to wishlist',
@@ -129,7 +130,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   ),
                   const SizedBox(height: 20),
                   if (product.brand != null)
-                    Text(
+                    AppText(
                       product.brand!.toUpperCase(),
                       style: const TextStyle(
                         fontSize: 10,
@@ -139,9 +140,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       ),
                     ),
                   const SizedBox(height: 4),
-                  Text(product.name, style: Theme.of(context).textTheme.headlineMedium),
+                  AppText(product.name, style: Theme.of(context).textTheme.headlineMedium),
                   const SizedBox(height: 6),
-                  Text(
+                  AppText(
                     '${product.unit} · ${product.categoryName}',
                     style: const TextStyle(fontSize: 13, color: AppColors.muted),
                   ),
@@ -149,7 +150,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text(
+                      AppText(
                         price == null ? 'Unavailable' : rupee(price!),
                         style: TextStyle(
                           fontSize: 28,
@@ -162,7 +163,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                         const SizedBox(width: 8),
                         const Padding(
                           padding: EdgeInsets.only(bottom: 4),
-                          child: Text(
+                          child: AppText(
                             'inclusive of all taxes',
                             style: TextStyle(fontSize: 10, color: AppColors.muted),
                           ),
@@ -202,9 +203,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('About this product', style: Theme.of(context).textTheme.titleMedium),
+                        AppText('About this product', style: Theme.of(context).textTheme.titleMedium),
                         const SizedBox(height: 8),
-                        Text(
+                        AppText(
                           product.description ??
                               'A quality-checked everyday essential, fulfilled by a verified neighbourhood shop.',
                           style: const TextStyle(fontSize: 13, height: 1.55, color: AppColors.muted),
@@ -228,7 +229,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                               size: 21,
                             ),
                             const SizedBox(width: 8),
-                            Text(
+                            AppText(
                               inventory == null ? 'Product Choice' : 'Shop Choice',
                               style: const TextStyle(
                                 fontSize: 14,
@@ -239,7 +240,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           ],
                         ),
                         const SizedBox(height: 7),
-                        Text(
+                        AppText(
                           inventory == null
                               ? 'The backend compares every nearby eligible shop and assigns the complete cart to one shop. Stock and the final price are revalidated when you checkout.'
                               : 'This item is added using the inventory of ${widget.shop?.name ?? 'the selected shop'}. Your cart will stay locked to this shop.',
@@ -276,7 +277,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(
+                        AppText(
                           price == null ? 'Currently unavailable' : rupee(price!),
                           style: TextStyle(
                             fontSize: 19,
@@ -284,7 +285,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                             color: price == null ? AppColors.red : AppColors.ink,
                           ),
                         ),
-                        Text(
+                        AppText(
                           available ? 'Ready from local stock' : 'Try another nearby product',
                           style: const TextStyle(fontSize: 10.5, color: AppColors.muted),
                         ),
@@ -305,7 +306,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                               ),
                             )
                           : const Icon(Icons.add_shopping_cart_rounded, size: 18),
-                      label: Text(available ? 'Add to cart' : 'Unavailable'),
+                      label: AppText(available ? 'Add to cart' : 'Unavailable'),
                     ),
                   ),
                 ],
@@ -329,7 +330,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         children: [
           Icon(icon, size: 14, color: color),
           const SizedBox(width: 5),
-          Text(
+          AppText(
             label,
             style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: color),
           ),

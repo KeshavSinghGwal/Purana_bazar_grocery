@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../screens/notifications/notifications_screen.dart';
 import '../state/notification_provider.dart';
+import '../core/localization.dart';
 
 class NotificationButton extends StatelessWidget {
   const NotificationButton({super.key});
@@ -11,7 +12,7 @@ class NotificationButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final unread = context.watch<NotificationProvider>().unread;
     return IconButton(
-      tooltip: 'Notifications',
+      tooltip: context.tr('Notifications'),
       onPressed: () => Navigator.of(context).push(
         MaterialPageRoute(builder: (_) => const NotificationsScreen()),
       ),

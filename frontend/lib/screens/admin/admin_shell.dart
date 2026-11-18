@@ -5,6 +5,7 @@ import 'admin_customers_screen.dart';
 import 'admin_dashboard_screen.dart';
 import 'admin_orders_screen.dart';
 import 'admin_shops_screen.dart';
+import '../../core/localization.dart';
 
 class AdminShell extends StatefulWidget {
   const AdminShell({super.key});
@@ -33,31 +34,31 @@ class _AdminShellState extends State<AdminShell> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
         onDestinationSelected: _select,
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined),
-            selectedIcon: Icon(Icons.dashboard_rounded),
-            label: 'Dashboard',
+            icon: const Icon(Icons.dashboard_outlined),
+            selectedIcon: const Icon(Icons.dashboard_rounded),
+            label: context.tr('Dashboard'),
           ),
           NavigationDestination(
-            icon: Icon(Icons.storefront_outlined),
-            selectedIcon: Icon(Icons.storefront_rounded),
-            label: 'Shops',
+            icon: const Icon(Icons.storefront_outlined),
+            selectedIcon: const Icon(Icons.storefront_rounded),
+            label: context.tr('Shops'),
           ),
           NavigationDestination(
-            icon: Icon(Icons.receipt_long_outlined),
-            selectedIcon: Icon(Icons.receipt_long_rounded),
-            label: 'Orders',
+            icon: const Icon(Icons.receipt_long_outlined),
+            selectedIcon: const Icon(Icons.receipt_long_rounded),
+            label: context.tr('Orders'),
           ),
           NavigationDestination(
-            icon: Icon(Icons.people_outline_rounded),
-            selectedIcon: Icon(Icons.people_rounded),
-            label: 'Customers',
+            icon: const Icon(Icons.people_outline_rounded),
+            selectedIcon: const Icon(Icons.people_rounded),
+            label: context.tr('Customers'),
           ),
           NavigationDestination(
-            icon: Icon(Icons.category_outlined),
-            selectedIcon: Icon(Icons.category_rounded),
-            label: 'Catalog',
+            icon: const Icon(Icons.category_outlined),
+            selectedIcon: const Icon(Icons.category_rounded),
+            label: context.tr('Catalog'),
           ),
         ],
       ),

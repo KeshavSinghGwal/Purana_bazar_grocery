@@ -9,6 +9,7 @@ import '../../state/cart_provider.dart';
 import '../../widgets/cart_button.dart';
 import '../../widgets/common.dart';
 import '../product/product_details_screen.dart';
+import '../../core/localization.dart';
 
 class WishlistScreen extends StatefulWidget {
   const WishlistScreen({super.key});
@@ -75,7 +76,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Wishlist'),
+        title: const AppText('Wishlist'),
         actions: const [CartButton(), SizedBox(width: 4)],
       ),
       body: SafeArea(
@@ -146,7 +147,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (product.brand != null)
-                  Text(
+                  AppText(
                     product.brand!.toUpperCase(),
                     style: const TextStyle(
                       fontSize: 8.5,
@@ -155,7 +156,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                       color: AppColors.muted,
                     ),
                   ),
-                Text(
+                AppText(
                   product.name,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -166,14 +167,14 @@ class _WishlistScreenState extends State<WishlistScreen> {
                   ),
                 ),
                 const SizedBox(height: 2),
-                Text(
+                AppText(
                   '${product.unit} · ${product.categoryName}',
                   style: const TextStyle(fontSize: 10.5, color: AppColors.muted),
                 ),
                 const SizedBox(height: 6),
                 Row(
                   children: [
-                    Text(
+                    AppText(
                       product.bestPrice == null ? 'Unavailable' : rupee(product.bestPrice!),
                       style: TextStyle(
                         fontSize: 15,
@@ -197,7 +198,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
                             fontWeight: FontWeight.w800,
                           ),
                         ),
-                        child: const Text('ADD'),
+                        child: const AppText('ADD'),
                       ),
                     ),
                   ],
@@ -207,7 +208,7 @@ class _WishlistScreenState extends State<WishlistScreen> {
           ),
           IconButton(
             visualDensity: VisualDensity.compact,
-            tooltip: 'Remove',
+            tooltip: context.tr('Remove'),
             onPressed: () => _remove(item),
             icon: const Icon(Icons.favorite_rounded, color: AppColors.red, size: 20),
           ),

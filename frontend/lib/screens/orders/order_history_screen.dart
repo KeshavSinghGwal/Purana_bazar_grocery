@@ -8,6 +8,7 @@ import '../../widgets/cart_button.dart';
 import '../../widgets/common.dart';
 import '../../widgets/notification_button.dart';
 import 'order_details_screen.dart';
+import '../../core/localization.dart';
 
 class OrderHistoryScreen extends StatefulWidget {
   const OrderHistoryScreen({super.key});
@@ -76,7 +77,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
     final filtered = _filtered;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My orders'),
+        title: const AppText('My orders'),
         actions: const [NotificationButton(), CartButton(), SizedBox(width: 4)],
       ),
       body: SafeArea(
@@ -94,7 +95,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                   itemBuilder: (context, index) {
                     final filter = _filters[index];
                     return ChoiceChip(
-                      label: Text(filter),
+                      label: AppText(filter),
                       selected: _filter == filter,
                       onSelected: (_) => setState(() => _filter = filter),
                     );
@@ -165,7 +166,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
           Row(
             children: [
               Expanded(
-                child: Text(
+                child: AppText(
                   order.orderNumber,
                   style: const TextStyle(
                     fontSize: 12.5,
@@ -186,21 +187,21 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    AppText(
                       order.shop.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
                     ),
                     const SizedBox(height: 2),
-                    Text(
+                    AppText(
                       orderItemSummary(order),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(fontSize: 10.5, color: AppColors.muted),
                     ),
                     const SizedBox(height: 2),
-                    Text(
+                    AppText(
                       compactDate(order.createdAt),
                       style: const TextStyle(fontSize: 9.5, color: AppColors.soft),
                     ),
@@ -210,12 +211,12 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(
+                  AppText(
                     rupee(order.totalAmount),
                     style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900),
                   ),
                   const SizedBox(height: 2),
-                  Text(
+                  AppText(
                     '${order.items.length} item${order.items.length == 1 ? '' : 's'}',
                     style: const TextStyle(fontSize: 9.5, color: AppColors.muted),
                   ),
@@ -230,7 +231,7 @@ class _OrderHistoryScreenState extends State<OrderHistoryScreen> {
                 status: order.shoppingMode == 'PRODUCT_CHOICE' ? 'PRODUCT CHOICE' : 'SHOP CHOICE',
               ),
               const Spacer(),
-              const Text(
+              const AppText(
                 'View details',
                 style: TextStyle(
                   fontSize: 11,

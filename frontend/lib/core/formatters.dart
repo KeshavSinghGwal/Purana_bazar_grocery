@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 
 import '../models/models.dart';
 import 'app_theme.dart';
+import 'localization.dart';
 
 String rupee(num value) => '₹${money(value.toDouble())}';
 
@@ -26,11 +27,12 @@ String friendlyTime(String raw) {
 }
 
 String statusLabel(String status) {
-  return status
+  final label = status
       .toLowerCase()
       .split('_')
       .map((part) => part.isEmpty ? part : '${part[0].toUpperCase()}${part.substring(1)}')
       .join(' ');
+  return AppLocalizations.current.tr(label);
 }
 
 Color statusColor(String status) {
@@ -80,7 +82,7 @@ void showMessage(BuildContext context, String message, {bool error = false}) {
               size: 20,
             ),
             const SizedBox(width: 10),
-            Expanded(child: Text(message)),
+            Expanded(child: AppText(message)),
           ],
         ),
       ),
@@ -88,10 +90,11 @@ void showMessage(BuildContext context, String message, {bool error = false}) {
 }
 
 String orderItemSummary(Order order) {
-  if (order.items.isEmpty) return 'No items';
+  if (order.items.isEmpty) return AppLocalizations.current.tr('No items');
   final first = order.items.first.productName;
   if (order.items.length == 1) return first;
-  return '$first + ${order.items.length - 1} more';
+  return AppLocalizations.current
+      .tr('$first + ${order.items.length - 1} more');
 }
 
 String initials(String name) {

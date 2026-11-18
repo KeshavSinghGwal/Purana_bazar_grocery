@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../core/app_theme.dart';
 import '../screens/cart/cart_screen.dart';
 import '../state/cart_provider.dart';
+import '../core/localization.dart';
 
 class CartButton extends StatelessWidget {
   const CartButton({super.key, this.onDark = false});
@@ -14,7 +15,7 @@ class CartButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final count = context.select<CartProvider, int>((cart) => cart.cart.itemCount);
     return IconButton(
-      tooltip: 'Cart',
+      tooltip: context.tr('Cart'),
       onPressed: () => Navigator.of(context).push(
         MaterialPageRoute(builder: (_) => const CartScreen()),
       ),
@@ -38,7 +39,7 @@ class CartButton extends StatelessWidget {
                   borderRadius: BorderRadius.circular(100),
                   border: Border.all(color: Colors.white, width: 1.4),
                 ),
-                child: Text(
+                child: AppText(
                   count > 99 ? '99+' : '$count',
                   style: const TextStyle(
                     color: Colors.white,

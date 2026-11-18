@@ -5,6 +5,7 @@ import '../../core/app_theme.dart';
 import '../../core/formatters.dart';
 import '../../models/models.dart';
 import '../../widgets/common.dart';
+import '../../core/localization.dart';
 
 class AdminShopsScreen extends StatefulWidget {
   const AdminShopsScreen({super.key});
@@ -80,18 +81,18 @@ class _AdminShopsScreenState extends State<AdminShopsScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Approve this shop?'),
-        content: Text(
+        title: const AppText('Approve this shop?'),
+        content: AppText(
           '${shop.name} will become visible to customers and can start receiving orders immediately.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: const AppText('Cancel'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Approve'),
+            child: const AppText('Approve'),
           ),
         ],
       ),
@@ -111,21 +112,21 @@ class _AdminShopsScreenState extends State<AdminShopsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(title),
+        title: AppText(title),
         content: TextField(
           controller: controller,
           maxLines: 3,
           textCapitalization: TextCapitalization.sentences,
-          decoration: InputDecoration(labelText: 'Reason', hintText: hint),
+          decoration: InputDecoration(labelText: tr(context, 'Reason'), hintText: tr(context, hint)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: const AppText('Cancel'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text(
+            child: AppText(
               action,
               style: const TextStyle(color: AppColors.red),
             ),
@@ -177,10 +178,10 @@ class _AdminShopsScreenState extends State<AdminShopsScreen> {
     final filtered = _filtered;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Shop approvals'),
+        title: const AppText('Shop approvals'),
         actions: [
           IconButton(
-            tooltip: 'Refresh',
+            tooltip: context.tr('Refresh'),
             onPressed: _load,
             icon: const Icon(Icons.refresh_rounded),
           ),
@@ -208,8 +209,8 @@ class _AdminShopsScreenState extends State<AdminShopsScreen> {
                         children: [
                           TextField(
                             onChanged: (value) => setState(() => _query = value),
-                            decoration: const InputDecoration(
-                              hintText: 'Search shops, owners or addresses…',
+                            decoration: InputDecoration(
+                              hintText: tr(context, 'Search shops, owners or addresses…'),
                               prefixIcon: Icon(Icons.search_rounded, size: 20),
                             ),
                           ),
@@ -222,7 +223,7 @@ class _AdminShopsScreenState extends State<AdminShopsScreen> {
                                     (filter) => Padding(
                                       padding: const EdgeInsets.only(right: 7),
                                       child: ChoiceChip(
-                                        label: Text(filter),
+                                        label: AppText(filter),
                                         selected: _filter == filter,
                                         onSelected: (_) =>
                                             setState(() => _filter = filter),
@@ -287,7 +288,7 @@ class _AdminShopsScreenState extends State<AdminShopsScreen> {
                     Row(
                       children: [
                         Expanded(
-                          child: Text(
+                          child: AppText(
                             shop.name,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -301,14 +302,14 @@ class _AdminShopsScreenState extends State<AdminShopsScreen> {
                       ],
                     ),
                     const SizedBox(height: 3),
-                    Text(
+                    AppText(
                       '${shop.ownerName} · ${shop.shopCategory ?? 'Neighbourhood store'}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(fontSize: 10.5, color: AppColors.muted),
                     ),
                     const SizedBox(height: 4),
-                    Text(
+                    AppText(
                       shop.address,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
@@ -343,7 +344,7 @@ class _AdminShopsScreenState extends State<AdminShopsScreen> {
                 color: AppColors.red.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(9),
               ),
-              child: Text(
+              child: AppText(
                 'Reason: ${shop.rejectionReason}',
                 style: const TextStyle(fontSize: 10.5, color: AppColors.red),
               ),
@@ -355,7 +356,7 @@ class _AdminShopsScreenState extends State<AdminShopsScreen> {
             children: [
               TextButton(
                 onPressed: busy ? null : () => _showDetails(shop),
-                child: const Text('Details'),
+                child: const AppText('Details'),
               ),
               const SizedBox(width: 4),
               if (busy)
@@ -376,7 +377,7 @@ class _AdminShopsScreenState extends State<AdminShopsScreen> {
                     hint: 'Let the owner know what needs fixing',
                     success: 'Shop rejected.',
                   ),
-                  child: const Text(
+                  child: const AppText(
                     'Reject',
                     style: TextStyle(color: AppColors.red),
                   ),
@@ -388,7 +389,7 @@ class _AdminShopsScreenState extends State<AdminShopsScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                   ),
                   onPressed: () => _approve(shop),
-                  child: const Text('Approve'),
+                  child: const AppText('Approve'),
                 ),
               ] else if (shop.approvalStatus == 'APPROVED') ...[
                 OutlinedButton(
@@ -404,7 +405,7 @@ class _AdminShopsScreenState extends State<AdminShopsScreen> {
                     hint: 'The shop will be hidden from customers',
                     success: 'Shop suspended.',
                   ),
-                  child: const Text('Suspend'),
+                  child: const AppText('Suspend'),
                 ),
               ] else ...[
                 ElevatedButton(
@@ -413,7 +414,7 @@ class _AdminShopsScreenState extends State<AdminShopsScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                   ),
                   onPressed: () => _reactivate(shop),
-                  child: const Text('Reactivate'),
+                  child: const AppText('Reactivate'),
                 ),
               ],
             ],
@@ -435,7 +436,7 @@ class _AdminShopsScreenState extends State<AdminShopsScreen> {
         children: [
           Icon(icon, size: 12, color: AppColors.green),
           const SizedBox(width: 4),
-          Text(
+          AppText(
             text,
             style: const TextStyle(
               fontSize: 9.5,
@@ -478,7 +479,7 @@ class _AdminShopsScreenState extends State<AdminShopsScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: Text(
+                    child: AppText(
                       shop.name,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
@@ -487,7 +488,7 @@ class _AdminShopsScreenState extends State<AdminShopsScreen> {
                 ],
               ),
               const SizedBox(height: 5),
-              Text(
+              AppText(
                 'Owned by ${shop.ownerName}',
                 style: const TextStyle(fontSize: 11.5, color: AppColors.muted),
               ),

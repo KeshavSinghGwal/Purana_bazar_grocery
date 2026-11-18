@@ -5,6 +5,7 @@ import '../../core/app_theme.dart';
 import '../../core/formatters.dart';
 import '../../models/models.dart';
 import '../../widgets/common.dart';
+import '../../core/localization.dart';
 
 class OwnerOrdersScreen extends StatefulWidget {
   const OwnerOrdersScreen({super.key});
@@ -114,10 +115,10 @@ class _OwnerOrdersScreenState extends State<OwnerOrdersScreen> {
               ),
             ),
             const SizedBox(height: 18),
-            Text('Update ${order.orderNumber}',
+            AppText('Update ${order.orderNumber}',
                 style: Theme.of(context).textTheme.titleLarge),
             const SizedBox(height: 4),
-            const Text(
+            const AppText(
               'Choose the next status. Stock is restored automatically for rejections or cancellations.',
               style: TextStyle(fontSize: 11.5, color: AppColors.muted),
             ),
@@ -138,7 +139,7 @@ class _OwnerOrdersScreenState extends State<OwnerOrdersScreen> {
                         ? AppColors.red
                         : AppColors.green,
                   ),
-                  title: Text(
+                  title: AppText(
                     statusLabel(target),
                     style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
                   ),
@@ -159,11 +160,11 @@ class _OwnerOrdersScreenState extends State<OwnerOrdersScreen> {
       final confirmed = await showDialog<bool>(
         context: context,
         builder: (context) => AlertDialog(
-          title: Text(selected == 'REJECTED' ? 'Reject order?' : 'Cancel order?'),
+          title: AppText(selected == 'REJECTED' ? 'Reject order?' : 'Cancel order?'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
+              const AppText(
                 'Reserved stock will be restored for the customer.',
                 style: TextStyle(fontSize: 12.5, height: 1.45),
               ),
@@ -171,9 +172,9 @@ class _OwnerOrdersScreenState extends State<OwnerOrdersScreen> {
               TextField(
                 controller: controller,
                 maxLines: 2,
-                decoration: const InputDecoration(
-                  labelText: 'Reason',
-                  hintText: 'e.g. Item unavailable',
+                decoration: InputDecoration(
+                  labelText: tr(context, 'Reason'),
+                  hintText: tr(context, 'e.g. Item unavailable'),
                 ),
               ),
             ],
@@ -181,11 +182,11 @@ class _OwnerOrdersScreenState extends State<OwnerOrdersScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Back'),
+              child: const AppText('Back'),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Confirm', style: TextStyle(color: AppColors.red)),
+              child: const AppText('Confirm', style: TextStyle(color: AppColors.red)),
             ),
           ],
         ),
@@ -222,10 +223,10 @@ class _OwnerOrdersScreenState extends State<OwnerOrdersScreen> {
     final filtered = _filtered;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Shop orders'),
+        title: const AppText('Shop orders'),
         actions: [
           IconButton(
-            tooltip: 'Refresh',
+            tooltip: context.tr('Refresh'),
             onPressed: _load,
             icon: const Icon(Icons.refresh_rounded),
           ),
@@ -246,7 +247,7 @@ class _OwnerOrdersScreenState extends State<OwnerOrdersScreen> {
                   itemBuilder: (context, index) {
                     final filter = _filters[index];
                     return ChoiceChip(
-                      label: Text(filter),
+                      label: AppText(filter),
                       selected: _filter == filter,
                       onSelected: (_) => setState(() => _filter = filter),
                     );
@@ -314,7 +315,7 @@ class _OwnerOrdersScreenState extends State<OwnerOrdersScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    AppText(
                       order.orderNumber,
                       style: const TextStyle(
                         fontSize: 12.5,
@@ -322,7 +323,7 @@ class _OwnerOrdersScreenState extends State<OwnerOrdersScreen> {
                       ),
                     ),
                     const SizedBox(height: 2),
-                    Text(
+                    AppText(
                       compactDate(order.createdAt),
                       style: const TextStyle(fontSize: 9.5, color: AppColors.soft),
                     ),
@@ -338,7 +339,7 @@ class _OwnerOrdersScreenState extends State<OwnerOrdersScreen> {
               CircleAvatar(
                 radius: 17,
                 backgroundColor: AppColors.mint,
-                child: Text(
+                child: AppText(
                   initials(order.customerName),
                   style: const TextStyle(
                     fontSize: 10,
@@ -352,11 +353,11 @@ class _OwnerOrdersScreenState extends State<OwnerOrdersScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    AppText(
                       order.customerName,
                       style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700),
                     ),
-                    Text(
+                    AppText(
                       order.deliveryAddress,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -365,14 +366,14 @@ class _OwnerOrdersScreenState extends State<OwnerOrdersScreen> {
                   ],
                 ),
               ),
-              Text(
+              AppText(
                 rupee(order.totalAmount),
                 style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900),
               ),
             ],
           ),
           const SizedBox(height: 8),
-          Text(
+          AppText(
             order.items.map((item) => '${item.productName} × ${item.quantity}').join('  ·  '),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -380,7 +381,7 @@ class _OwnerOrdersScreenState extends State<OwnerOrdersScreen> {
           ),
           if (order.customerNote != null) ...[
             const SizedBox(height: 5),
-            Text(
+            AppText(
               'Note: ${order.customerNote}',
               style: const TextStyle(fontSize: 10, fontStyle: FontStyle.italic, color: AppColors.muted),
             ),
@@ -419,11 +420,11 @@ class _OwnerOrdersScreenState extends State<OwnerOrdersScreen> {
                               color: Colors.white,
                             ),
                           )
-                        : const Text('Update status'),
+                        : const AppText('Update status'),
                   ),
                 )
               else
-                Text(
+                AppText(
                   order.orderStatus == 'DELIVERED'
                       ? 'Completed'
                       : statusLabel(order.orderStatus),

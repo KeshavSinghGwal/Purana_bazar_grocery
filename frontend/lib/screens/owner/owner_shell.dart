@@ -4,6 +4,7 @@ import 'owner_dashboard_screen.dart';
 import 'owner_inventory_screen.dart';
 import 'owner_orders_screen.dart';
 import 'owner_shop_screen.dart';
+import '../../core/localization.dart';
 
 class OwnerShell extends StatefulWidget {
   const OwnerShell({super.key});
@@ -29,26 +30,26 @@ class _OwnerShellState extends State<OwnerShell> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _index,
         onDestinationSelected: (index) => setState(() => _index = index),
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.dashboard_outlined),
-            selectedIcon: Icon(Icons.dashboard_rounded),
-            label: 'Dashboard',
+            icon: const Icon(Icons.dashboard_outlined),
+            selectedIcon: const Icon(Icons.dashboard_rounded),
+            label: context.tr('Dashboard'),
           ),
           NavigationDestination(
-            icon: Icon(Icons.receipt_long_outlined),
-            selectedIcon: Icon(Icons.receipt_long_rounded),
-            label: 'Orders',
+            icon: const Icon(Icons.receipt_long_outlined),
+            selectedIcon: const Icon(Icons.receipt_long_rounded),
+            label: context.tr('Orders'),
           ),
           NavigationDestination(
-            icon: Icon(Icons.inventory_2_outlined),
-            selectedIcon: Icon(Icons.inventory_2_rounded),
-            label: 'Inventory',
+            icon: const Icon(Icons.inventory_2_outlined),
+            selectedIcon: const Icon(Icons.inventory_2_rounded),
+            label: context.tr('Inventory'),
           ),
           NavigationDestination(
-            icon: Icon(Icons.storefront_outlined),
-            selectedIcon: Icon(Icons.storefront_rounded),
-            label: 'My shop',
+            icon: const Icon(Icons.storefront_outlined),
+            selectedIcon: const Icon(Icons.storefront_rounded),
+            label: context.tr('My shop'),
           ),
         ],
       ),

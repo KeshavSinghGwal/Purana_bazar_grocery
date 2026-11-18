@@ -9,6 +9,7 @@ import '../core/api_client.dart';
 import '../core/push_service.dart';
 import '../models/models.dart';
 import 'auth_provider.dart';
+import '../core/localization.dart';
 
 /// Keeps the in-app notification centre and the FCM device token in sync.
 class NotificationProvider extends ChangeNotifier {
@@ -113,13 +114,13 @@ class NotificationProvider extends ChangeNotifier {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(title, style: const TextStyle(fontWeight: FontWeight.w700)),
-            if (body.isNotEmpty) Text(body),
+            AppText(title, style: const TextStyle(fontWeight: FontWeight.w700)),
+            if (body.isNotEmpty) AppText(body),
           ],
         ),
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 4),
-        action: SnackBarAction(label: 'View', onPressed: load),
+        action: SnackBarAction(label: AppLocalizations.current.tr('View'), onPressed: load),
       ),
     );
     unawaited(load(silent: true));

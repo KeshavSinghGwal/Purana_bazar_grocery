@@ -7,6 +7,8 @@ import '../../core/formatters.dart';
 import '../../models/models.dart';
 import '../../state/auth_provider.dart';
 import '../../widgets/common.dart';
+import '../../widgets/language_selector.dart';
+import '../../core/localization.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key, this.onNavigate});
@@ -66,15 +68,16 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     final auth = context.watch<AuthProvider>();
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Admin console'),
+        title: const AppText('Admin console'),
         actions: [
+          const LanguageButton(),
           IconButton(
-            tooltip: 'Refresh',
+            tooltip: context.tr('Refresh'),
             onPressed: _load,
             icon: const Icon(Icons.refresh_rounded),
           ),
           IconButton(
-            tooltip: 'Sign out',
+            tooltip: context.tr('Sign out'),
             onPressed: () => auth.logout(),
             icon: const Icon(Icons.logout_rounded),
           ),
@@ -175,7 +178,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                       ),
                                       const SizedBox(width: 10),
                                       Expanded(
-                                        child: Text(
+                                        child: AppText(
                                           'Everything is reviewed. New shop registrations will appear here.',
                                           style: Theme.of(context).textTheme.bodySmall,
                                         ),
@@ -205,7 +208,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                                   crossAxisAlignment:
                                                       CrossAxisAlignment.start,
                                                   children: [
-                                                    Text(
+                                                    AppText(
                                                       shop.name,
                                                       maxLines: 1,
                                                       overflow: TextOverflow.ellipsis,
@@ -215,7 +218,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                                                       ),
                                                     ),
                                                     const SizedBox(height: 2),
-                                                    Text(
+                                                    AppText(
                                                       '${shop.ownerName} · ${shop.address}',
                                                       maxLines: 1,
                                                       overflow: TextOverflow.ellipsis,
@@ -278,7 +281,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                const AppText(
                   'MARKETPLACE CONTROL',
                   style: TextStyle(
                     fontSize: 8.5,
@@ -288,7 +291,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
+                AppText(
                   'Welcome, $name',
                   style: const TextStyle(
                     color: Colors.white,
@@ -298,7 +301,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
+                AppText(
                   'Approve shops, watch orders and curate the catalog from one place.',
                   style: TextStyle(
                     color: Colors.white.withValues(alpha: 0.78),
@@ -337,7 +340,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               child: Icon(icon, color: color, size: 18),
             ),
             const SizedBox(height: 10),
-            Text(
+            AppText(
               value,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -348,7 +351,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
               ),
             ),
             const SizedBox(height: 2),
-            Text(
+            AppText(
               label,
               style: const TextStyle(fontSize: 10, color: AppColors.muted),
             ),

@@ -14,6 +14,7 @@ import '../../widgets/common.dart';
 import '../cart/cart_screen.dart';
 import '../location/addresses_screen.dart';
 import 'product_details_screen.dart';
+import '../../core/localization.dart';
 
 class ProductChoiceScreen extends StatefulWidget {
   const ProductChoiceScreen({
@@ -215,11 +216,11 @@ class _ProductChoiceScreenState extends State<ProductChoiceScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
+                            AppText(
                               quote.found ? 'Best shop found' : 'No eligible shop',
                               style: Theme.of(context).textTheme.titleLarge,
                             ),
-                            Text(
+                            AppText(
                               quote.found
                                   ? 'One shop will fulfil your complete cart'
                                   : 'We never split an order across shops',
@@ -245,7 +246,7 @@ class _ProductChoiceScreenState extends State<ProductChoiceScreen> {
                                   color: AppColors.green, size: 23),
                               const SizedBox(width: 9),
                               Expanded(
-                                child: Text(
+                                child: AppText(
                                   quote.selectedShop!.name,
                                   style: const TextStyle(
                                     fontSize: 17,
@@ -261,7 +262,7 @@ class _ProductChoiceScreenState extends State<ProductChoiceScreen> {
                             ],
                           ),
                           const SizedBox(height: 5),
-                          Text(
+                          AppText(
                             quote.selectedShop!.address,
                             style: const TextStyle(fontSize: 11.5, color: AppColors.muted),
                           ),
@@ -276,7 +277,7 @@ class _ProductChoiceScreenState extends State<ProductChoiceScreen> {
                               const Icon(Icons.delivery_dining_rounded,
                                   size: 15, color: AppColors.green),
                               const SizedBox(width: 3),
-                              Text(
+                              AppText(
                                 '${quote.selectedShop!.estimatedDeliveryMinutes} min',
                                 style: const TextStyle(fontSize: 11, color: AppColors.muted),
                               ),
@@ -286,7 +287,7 @@ class _ProductChoiceScreenState extends State<ProductChoiceScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Text('Fulfilment check', style: Theme.of(context).textTheme.titleSmall),
+                    AppText('Fulfilment check', style: Theme.of(context).textTheme.titleSmall),
                     const SizedBox(height: 7),
                     ...quote.items.map(
                       (line) => Padding(
@@ -297,12 +298,12 @@ class _ProductChoiceScreenState extends State<ProductChoiceScreen> {
                                 color: AppColors.green, size: 17),
                             const SizedBox(width: 7),
                             Expanded(
-                              child: Text(
+                              child: AppText(
                                 '${line.name} × ${line.requestedQuantity}',
                                 style: const TextStyle(fontSize: 12),
                               ),
                             ),
-                            Text(
+                            AppText(
                               rupee(line.lineTotal),
                               style: const TextStyle(
                                 fontSize: 12,
@@ -332,18 +333,18 @@ class _ProductChoiceScreenState extends State<ProductChoiceScreen> {
                           );
                         },
                         icon: const Icon(Icons.shopping_bag_outlined),
-                        label: const Text('Review cart & checkout'),
+                        label: const AppText('Review cart & checkout'),
                       ),
                     ),
                   ] else ...[
-                    Text(
+                    AppText(
                       quote.message ??
                           'No nearby shop can fulfil the complete cart right now.',
                       style: const TextStyle(fontSize: 13, height: 1.5, color: AppColors.muted),
                     ),
                     if (quote.unavailableProducts.isNotEmpty) ...[
                       const SizedBox(height: 16),
-                      Text('Unavailable products',
+                      AppText('Unavailable products',
                           style: Theme.of(context).textTheme.titleSmall),
                       const SizedBox(height: 8),
                       ...quote.unavailableProducts.map(
@@ -361,7 +362,7 @@ class _ProductChoiceScreenState extends State<ProductChoiceScreen> {
                                   color: AppColors.red, size: 19),
                               const SizedBox(width: 9),
                               Expanded(
-                                child: Text(
+                                child: AppText(
                                   '${item.name} — requested ${item.requestedQuantity}, max ${item.maxAvailable}',
                                   style: const TextStyle(fontSize: 12, color: AppColors.red),
                                 ),
@@ -373,7 +374,7 @@ class _ProductChoiceScreenState extends State<ProductChoiceScreen> {
                     ],
                     if (quote.consideredShops.isNotEmpty) ...[
                       const SizedBox(height: 14),
-                      Text('Shops considered',
+                      AppText('Shops considered',
                           style: Theme.of(context).textTheme.titleSmall),
                       const SizedBox(height: 7),
                       ...quote.consideredShops.take(6).map(
@@ -392,13 +393,13 @@ class _ProductChoiceScreenState extends State<ProductChoiceScreen> {
                                   ),
                                   const SizedBox(width: 7),
                                   Expanded(
-                                    child: Text(
+                                    child: AppText(
                                       '${candidate.name} · ${candidate.distanceKm.toStringAsFixed(1)} km',
                                       style: const TextStyle(fontSize: 11.5),
                                     ),
                                   ),
                                   Flexible(
-                                    child: Text(
+                                    child: AppText(
                                       candidate.reason ?? (candidate.eligible ? 'Eligible' : 'Not eligible'),
                                       textAlign: TextAlign.right,
                                       style: const TextStyle(
@@ -415,7 +416,7 @@ class _ProductChoiceScreenState extends State<ProductChoiceScreen> {
                     const SizedBox(height: 20),
                     OutlinedButton(
                       onPressed: () => Navigator.pop(context),
-                      child: const Text('Edit cart'),
+                      child: const AppText('Edit cart'),
                     ),
                   ],
                 ],
@@ -432,7 +433,7 @@ class _ProductChoiceScreenState extends State<ProductChoiceScreen> {
     final itemCount = context.watch<CartProvider>().cart.itemCount;
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.initialCategoryName ?? 'Product Choice'),
+        title: AppText(widget.initialCategoryName ?? 'Product Choice'),
         actions: const [CartButton(), SizedBox(width: 4)],
       ),
       body: SafeArea(
@@ -450,7 +451,7 @@ class _ProductChoiceScreenState extends State<ProductChoiceScreen> {
                       textInputAction: TextInputAction.search,
                       onSubmitted: (_) => _loadProducts(),
                       decoration: InputDecoration(
-                        hintText: 'Search products, brands or categories…',
+                        hintText: tr(context, 'Search products, brands or categories…'),
                         prefixIcon: const Icon(Icons.search_rounded, size: 21),
                         suffixIcon: _query.isEmpty
                             ? null
@@ -482,7 +483,7 @@ class _ProductChoiceScreenState extends State<ProductChoiceScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
+                                AppText(
                                   'One cart, one shop',
                                   style: TextStyle(
                                     fontSize: 13,
@@ -491,7 +492,7 @@ class _ProductChoiceScreenState extends State<ProductChoiceScreen> {
                                   ),
                                 ),
                                 SizedBox(height: 2),
-                                Text(
+                                AppText(
                                   'We find the nearest shop with every item in stock. Your order is never split.',
                                   style: TextStyle(
                                     fontSize: 10.5,
@@ -511,7 +512,7 @@ class _ProductChoiceScreenState extends State<ProductChoiceScreen> {
                                       height: 15,
                                       child: CircularProgressIndicator(strokeWidth: 2),
                                     )
-                                  : const Text('Find shop'),
+                                  : const AppText('Find shop'),
                             ),
                         ],
                       ),
@@ -523,7 +524,7 @@ class _ProductChoiceScreenState extends State<ProductChoiceScreen> {
                         scrollDirection: Axis.horizontal,
                         children: [
                           ChoiceChip(
-                            label: const Text('All'),
+                            label: const AppText('All'),
                             selected: _categoryId == null,
                             onSelected: (_) {
                               setState(() => _categoryId = null);
@@ -535,7 +536,7 @@ class _ProductChoiceScreenState extends State<ProductChoiceScreen> {
                             (category) => Padding(
                               padding: const EdgeInsets.only(right: 7),
                               child: ChoiceChip(
-                                label: Text(category.name),
+                                label: AppText(category.name),
                                 selected: _categoryId == category.id,
                                 onSelected: (_) {
                                   setState(() => _categoryId =
@@ -553,7 +554,7 @@ class _ProductChoiceScreenState extends State<ProductChoiceScreen> {
                         padding: const EdgeInsets.only(top: 11, bottom: 2),
                         child: Row(
                           children: [
-                            Text(
+                            AppText(
                               '${_products.length} products',
                               style: const TextStyle(
                                 fontSize: 11,
@@ -564,7 +565,7 @@ class _ProductChoiceScreenState extends State<ProductChoiceScreen> {
                             const Spacer(),
                             const Icon(Icons.sort_rounded, size: 15, color: AppColors.muted),
                             const SizedBox(width: 4),
-                            const Text(
+                            const AppText(
                               'Best price',
                               style: TextStyle(fontSize: 11, color: AppColors.muted),
                             ),

@@ -5,6 +5,7 @@ import '../../core/app_theme.dart';
 import '../../core/formatters.dart';
 import '../../models/models.dart';
 import '../../widgets/common.dart';
+import '../../core/localization.dart';
 
 class AdminCatalogScreen extends StatelessWidget {
   const AdminCatalogScreen({super.key});
@@ -15,14 +16,14 @@ class AdminCatalogScreen extends StatelessWidget {
       length: 2,
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Catalog'),
-          bottom: const TabBar(
+          title: const AppText('Catalog'),
+          bottom: TabBar(
             labelColor: AppColors.green,
             unselectedLabelColor: AppColors.muted,
             indicatorColor: AppColors.green,
             tabs: [
-              Tab(text: 'Products'),
-              Tab(text: 'Categories'),
+              Tab(text: context.tr('Products')),
+              Tab(text: context.tr('Categories')),
             ],
           ),
         ),
@@ -141,7 +142,7 @@ class _ProductsTabState extends State<_ProductsTab>
       barrierDismissible: false,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: Text(isEdit ? 'Edit product' : 'New product'),
+          title: AppText(isEdit ? 'Edit product' : 'New product'),
           content: SizedBox(
             width: 460,
             child: Form(
@@ -153,7 +154,7 @@ class _ProductsTabState extends State<_ProductsTab>
                     TextFormField(
                       controller: name,
                       textCapitalization: TextCapitalization.words,
-                      decoration: const InputDecoration(labelText: 'Product name'),
+                      decoration: InputDecoration(labelText: tr(context, 'Product name')),
                       validator: (value) => (value == null || value.trim().isEmpty)
                           ? 'Enter a product name'
                           : null,
@@ -165,16 +166,16 @@ class _ProductsTabState extends State<_ProductsTab>
                           child: TextFormField(
                             controller: brand,
                             textCapitalization: TextCapitalization.words,
-                            decoration: const InputDecoration(labelText: 'Brand'),
+                            decoration: InputDecoration(labelText: tr(context, 'Brand')),
                           ),
                         ),
                         const SizedBox(width: 10),
                         Expanded(
                           child: TextFormField(
                             controller: unit,
-                            decoration: const InputDecoration(
-                              labelText: 'Unit / pack size',
-                              hintText: '1 kg, 500 g…',
+                            decoration: InputDecoration(
+                              labelText: tr(context, 'Unit / pack size'),
+                              hintText: tr(context, '1 kg, 500 g…'),
                             ),
                             validator: (value) =>
                                 (value == null || value.trim().isEmpty)
@@ -187,12 +188,12 @@ class _ProductsTabState extends State<_ProductsTab>
                     const SizedBox(height: 11),
                     DropdownButtonFormField<int>(
                       initialValue: categoryId,
-                      decoration: const InputDecoration(labelText: 'Category'),
+                      decoration: InputDecoration(labelText: tr(context, 'Category')),
                       items: _categories
                           .map(
                             (category) => DropdownMenuItem(
                               value: category.id,
-                              child: Text(
+                              child: AppText(
                                 category.active
                                     ? category.name
                                     : '${category.name} (inactive)',
@@ -209,24 +210,24 @@ class _ProductsTabState extends State<_ProductsTab>
                     const SizedBox(height: 11),
                     TextFormField(
                       controller: imageUrl,
-                      decoration: const InputDecoration(labelText: 'Image URL'),
+                      decoration: InputDecoration(labelText: tr(context, 'Image URL')),
                     ),
                     const SizedBox(height: 11),
                     TextFormField(
                       controller: description,
                       maxLines: 2,
                       textCapitalization: TextCapitalization.sentences,
-                      decoration: const InputDecoration(labelText: 'Description'),
+                      decoration: InputDecoration(labelText: tr(context, 'Description')),
                     ),
                     const SizedBox(height: 6),
                     SwitchListTile.adaptive(
                       contentPadding: EdgeInsets.zero,
                       activeTrackColor: AppColors.green,
-                      title: const Text(
+                      title: const AppText(
                         'Active in catalog',
                         style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
                       ),
-                      subtitle: const Text(
+                      subtitle: const AppText(
                         'Inactive products disappear from customer search.',
                         style: TextStyle(fontSize: 10.5),
                       ),
@@ -242,7 +243,7 @@ class _ProductsTabState extends State<_ProductsTab>
           actions: [
             TextButton(
               onPressed: busy ? null : () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: const AppText('Cancel'),
             ),
             ElevatedButton(
               onPressed: busy
@@ -291,7 +292,7 @@ class _ProductsTabState extends State<_ProductsTab>
                         color: Colors.white,
                       ),
                     )
-                  : Text(isEdit ? 'Save changes' : 'Create product'),
+                  : AppText(isEdit ? 'Save changes' : 'Create product'),
             ),
           ],
         ),
@@ -308,18 +309,18 @@ class _ProductsTabState extends State<_ProductsTab>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Deactivate product?'),
-        content: Text(
+        title: const AppText('Deactivate product?'),
+        content: AppText(
           '${product.name} will be hidden from the customer catalog. Shops already listing it will keep their inventory records.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: const AppText('Cancel'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Deactivate', style: TextStyle(color: AppColors.red)),
+            child: const AppText('Deactivate', style: TextStyle(color: AppColors.red)),
           ),
         ],
       ),
@@ -349,7 +350,7 @@ class _ProductsTabState extends State<_ProductsTab>
         backgroundColor: AppColors.green,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.add_rounded),
-        label: const Text('New product'),
+        label: const AppText('New product'),
       ),
       body: RefreshIndicator(
         onRefresh: _load,
@@ -370,13 +371,13 @@ class _ProductsTabState extends State<_ProductsTab>
                     children: [
                       TextField(
                         onChanged: (value) => setState(() => _query = value),
-                        decoration: const InputDecoration(
-                          hintText: 'Search products, brands or categories…',
+                        decoration: InputDecoration(
+                          hintText: tr(context, 'Search products, brands or categories…'),
                           prefixIcon: Icon(Icons.search_rounded, size: 20),
                         ),
                       ),
                       const SizedBox(height: 13),
-                      Text(
+                      AppText(
                         '${filtered.length} of ${_products.length} products',
                         style: const TextStyle(fontSize: 11, color: AppColors.muted),
                       ),
@@ -418,7 +419,7 @@ class _ProductsTabState extends State<_ProductsTab>
                 Row(
                   children: [
                     Expanded(
-                      child: Text(
+                      child: AppText(
                         product.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -432,14 +433,14 @@ class _ProductsTabState extends State<_ProductsTab>
                   ],
                 ),
                 const SizedBox(height: 2),
-                Text(
+                AppText(
                   '${product.brand ?? 'Unbranded'} · ${product.unit} · ${product.categoryName}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontSize: 10, color: AppColors.muted),
                 ),
                 const SizedBox(height: 5),
-                Text(
+                AppText(
                   '${product.availableShops} shop${product.availableShops == 1 ? '' : 's'} · ${product.totalStock} in stock'
                   '${product.bestPrice == null ? '' : ' · from ${rupee(product.bestPrice!)}'}',
                   style: const TextStyle(fontSize: 10, color: AppColors.muted),
@@ -456,12 +457,12 @@ class _ProductsTabState extends State<_ProductsTab>
             )
           else ...[
             IconButton(
-              tooltip: 'Edit product',
+              tooltip: context.tr('Edit product'),
               onPressed: () => _openForm(existing: product),
               icon: const Icon(Icons.edit_outlined, size: 19),
             ),
             IconButton(
-              tooltip: 'Deactivate product',
+              tooltip: context.tr('Deactivate product'),
               onPressed: product.active ? () => _deactivate(product) : null,
               icon: const Icon(
                 Icons.delete_outline_rounded,
@@ -538,7 +539,7 @@ class _CategoriesTabState extends State<_CategoriesTab>
       barrierDismissible: false,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: Text(isEdit ? 'Edit category' : 'New category'),
+          title: AppText(isEdit ? 'Edit category' : 'New category'),
           content: SizedBox(
             width: 420,
             child: Form(
@@ -550,7 +551,7 @@ class _CategoriesTabState extends State<_CategoriesTab>
                     TextFormField(
                       controller: name,
                       textCapitalization: TextCapitalization.words,
-                      decoration: const InputDecoration(labelText: 'Category name'),
+                      decoration: InputDecoration(labelText: tr(context, 'Category name')),
                       validator: (value) => (value == null || value.trim().isEmpty)
                           ? 'Enter a category name'
                           : null,
@@ -560,25 +561,25 @@ class _CategoriesTabState extends State<_CategoriesTab>
                       controller: description,
                       maxLines: 2,
                       textCapitalization: TextCapitalization.sentences,
-                      decoration: const InputDecoration(labelText: 'Description'),
+                      decoration: InputDecoration(labelText: tr(context, 'Description')),
                     ),
                     const SizedBox(height: 11),
                     TextFormField(
                       controller: imageUrl,
-                      decoration: const InputDecoration(labelText: 'Image URL'),
+                      decoration: InputDecoration(labelText: tr(context, 'Image URL')),
                     ),
                     const SizedBox(height: 11),
                     TextFormField(
                       controller: displayOrder,
                       keyboardType: TextInputType.number,
-                      decoration: const InputDecoration(
-                        labelText: 'Display order',
-                        helperText: 'Lower numbers appear first.',
+                      decoration: InputDecoration(
+                        labelText: tr(context, 'Display order'),
+                        helperText: tr(context, 'Lower numbers appear first.'),
                       ),
                       validator: (value) {
                         final parsed = int.tryParse(value?.trim() ?? '');
                         if (parsed == null || parsed < 0) {
-                          return 'Enter 0 or more';
+                          return AppLocalizations.current.tr('Enter 0 or more');
                         }
                         return null;
                       },
@@ -587,7 +588,7 @@ class _CategoriesTabState extends State<_CategoriesTab>
                     SwitchListTile.adaptive(
                       contentPadding: EdgeInsets.zero,
                       activeTrackColor: AppColors.green,
-                      title: const Text(
+                      title: const AppText(
                         'Active category',
                         style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
                       ),
@@ -603,7 +604,7 @@ class _CategoriesTabState extends State<_CategoriesTab>
           actions: [
             TextButton(
               onPressed: busy ? null : () => Navigator.pop(context),
-              child: const Text('Cancel'),
+              child: const AppText('Cancel'),
             ),
             ElevatedButton(
               onPressed: busy
@@ -653,7 +654,7 @@ class _CategoriesTabState extends State<_CategoriesTab>
                         color: Colors.white,
                       ),
                     )
-                  : Text(isEdit ? 'Save changes' : 'Create category'),
+                  : AppText(isEdit ? 'Save changes' : 'Create category'),
             ),
           ],
         ),
@@ -669,18 +670,18 @@ class _CategoriesTabState extends State<_CategoriesTab>
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Deactivate category?'),
-        content: Text(
+        title: const AppText('Deactivate category?'),
+        content: AppText(
           '${category.name} will be hidden from the customer catalog. Products in it stay in the database and can be reactivated later.',
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: const AppText('Cancel'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Deactivate', style: TextStyle(color: AppColors.red)),
+            child: const AppText('Deactivate', style: TextStyle(color: AppColors.red)),
           ),
         ],
       ),
@@ -709,7 +710,7 @@ class _CategoriesTabState extends State<_CategoriesTab>
         backgroundColor: AppColors.green,
         foregroundColor: Colors.white,
         icon: const Icon(Icons.add_rounded),
-        label: const Text('New category'),
+        label: const AppText('New category'),
       ),
       body: RefreshIndicator(
         onRefresh: _load,
@@ -772,7 +773,7 @@ class _CategoriesTabState extends State<_CategoriesTab>
                 Row(
                   children: [
                     Expanded(
-                      child: Text(
+                      child: AppText(
                         category.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -786,14 +787,14 @@ class _CategoriesTabState extends State<_CategoriesTab>
                   ],
                 ),
                 const SizedBox(height: 2),
-                Text(
+                AppText(
                   category.description ?? 'No description',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontSize: 10.5, color: AppColors.muted),
                 ),
                 const SizedBox(height: 2),
-                Text(
+                AppText(
                   'Display order ${category.displayOrder} · ID #${category.id}',
                   style: const TextStyle(fontSize: 9.5, color: AppColors.muted),
                 ),
@@ -808,12 +809,12 @@ class _CategoriesTabState extends State<_CategoriesTab>
             )
           else ...[
             IconButton(
-              tooltip: 'Edit category',
+              tooltip: context.tr('Edit category'),
               onPressed: () => _openForm(existing: category),
               icon: const Icon(Icons.edit_outlined, size: 19),
             ),
             IconButton(
-              tooltip: 'Deactivate category',
+              tooltip: context.tr('Deactivate category'),
               onPressed: category.active ? () => _deactivate(category) : null,
               icon: const Icon(
                 Icons.delete_outline_rounded,

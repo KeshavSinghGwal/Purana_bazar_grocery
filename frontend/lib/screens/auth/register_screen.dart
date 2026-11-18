@@ -6,6 +6,7 @@ import '../../core/app_theme.dart';
 import '../../core/formatters.dart';
 import '../../state/auth_provider.dart';
 import '../../widgets/common.dart';
+import '../../core/localization.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -56,7 +57,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Create account')),
+      appBar: AppBar(title: const AppText('Create account')),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(20, 12, 20, 32),
@@ -68,12 +69,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 children: [
                   const AppLogo(small: true),
                   const SizedBox(height: 28),
-                  Text(
+                  AppText(
                     'Your bazaar starts here.',
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
                   const SizedBox(height: 8),
-                  const Text(
+                  const AppText(
                     'Create a customer account to order from verified neighbourhood shops.',
                     style: TextStyle(fontSize: 14, height: 1.5, color: AppColors.muted),
                   ),
@@ -89,13 +90,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             controller: _name,
                             textCapitalization: TextCapitalization.words,
                             textInputAction: TextInputAction.next,
-                            decoration: const InputDecoration(
-                              labelText: 'Full name',
+                            decoration: InputDecoration(
+                              labelText: tr(context, 'Full name'),
                               prefixIcon: Icon(Icons.person_outline_rounded, size: 20),
                             ),
                             validator: (value) {
                               if (value == null || value.trim().length < 2) {
-                                return 'Enter your full name';
+                                return AppLocalizations.current.tr('Enter your full name');
                               }
                               return null;
                             },
@@ -105,13 +106,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             controller: _email,
                             keyboardType: TextInputType.emailAddress,
                             textInputAction: TextInputAction.next,
-                            decoration: const InputDecoration(
-                              labelText: 'Email address',
+                            decoration: InputDecoration(
+                              labelText: tr(context, 'Email address'),
                               prefixIcon: Icon(Icons.mail_outline_rounded, size: 20),
                             ),
                             validator: (value) {
                               if (value == null || !value.contains('@')) {
-                                return 'Enter a valid email';
+                                return AppLocalizations.current.tr('Enter a valid email');
                               }
                               return null;
                             },
@@ -121,8 +122,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             controller: _phone,
                             keyboardType: TextInputType.phone,
                             textInputAction: TextInputAction.next,
-                            decoration: const InputDecoration(
-                              labelText: 'Phone number (optional)',
+                            decoration: InputDecoration(
+                              labelText: tr(context, 'Phone number (optional)'),
                               prefixIcon: Icon(Icons.phone_outlined, size: 20),
                             ),
                           ),
@@ -133,8 +134,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             textInputAction: TextInputAction.done,
                             onFieldSubmitted: (_) => _submit(),
                             decoration: InputDecoration(
-                              labelText: 'Password',
-                              helperText: 'Use at least 8 characters',
+                              labelText: tr(context, 'Password'),
+                              helperText: tr(context, 'Use at least 8 characters'),
                               prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20),
                               suffixIcon: IconButton(
                                 onPressed: () => setState(() => _obscure = !_obscure),
@@ -148,7 +149,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             ),
                             validator: (value) {
                               if (value == null || value.length < 8) {
-                                return 'Password must be at least 8 characters';
+                                return AppLocalizations.current.tr('Password must be at least 8 characters');
                               }
                               return null;
                             },
@@ -167,7 +168,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                         color: Colors.white,
                                       ),
                                     )
-                                  : const Text('Create my account'),
+                                  : const AppText('Create my account'),
                             ),
                           ),
                         ],
@@ -179,7 +180,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     child: TextButton.icon(
                       onPressed: () => Navigator.of(context).pop(),
                       icon: const Icon(Icons.arrow_back_rounded, size: 17),
-                      label: const Text('I already have an account'),
+                      label: const AppText('I already have an account'),
                     ),
                   ),
                 ],

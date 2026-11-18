@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/app_theme.dart';
 import '../widgets/common.dart';
+import '../core/localization.dart';
 
 class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key, this.error, this.onRetry});
@@ -69,7 +70,7 @@ class SplashScreen extends StatelessWidget {
                   else ...[
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 34),
-                      child: Text(
+                      child: AppText(
                         error!,
                         textAlign: TextAlign.center,
                         style: const TextStyle(color: AppColors.red),
@@ -78,11 +79,11 @@ class SplashScreen extends StatelessWidget {
                     const SizedBox(height: 14),
                     OutlinedButton(
                       onPressed: onRetry,
-                      child: const Text('Try again'),
+                      child: const AppText('Try again'),
                     ),
                   ],
                   const SizedBox(height: 24),
-                  const Text(
+                  const AppText(
                     'Everyday essentials. Nearby shops. One bazaar.',
                     style: TextStyle(
                       fontSize: 12,

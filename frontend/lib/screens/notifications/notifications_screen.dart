@@ -8,6 +8,7 @@ import '../../state/auth_provider.dart';
 import '../../state/notification_provider.dart';
 import '../../widgets/common.dart';
 import '../orders/order_details_screen.dart';
+import '../../core/localization.dart';
 
 class NotificationsScreen extends StatefulWidget {
   const NotificationsScreen({super.key});
@@ -45,12 +46,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     final provider = context.watch<NotificationProvider>();
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Notifications'),
+        title: const AppText('Notifications'),
         actions: [
           if (provider.unread > 0)
             TextButton(
               onPressed: provider.markAllRead,
-              child: const Text('Mark all read'),
+              child: const AppText('Mark all read'),
             ),
           const SizedBox(width: 4),
         ],
@@ -81,7 +82,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                                 onPressed: provider.enablePush,
                                 icon: const Icon(Icons.notifications_active_outlined,
                                     size: 18),
-                                label: Text(provider.pushDenied
+                                label: AppText(provider.pushDenied
                                     ? 'Allow push notifications'
                                     : 'Enable push notifications'),
                               ),
@@ -121,7 +122,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               color: AppColors.green, size: 20),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(
+            child: AppText(
               provider.pushDenied
                   ? 'Push notifications are blocked in this browser. Enable them in site settings to get order alerts.'
                   : 'Push notifications keep you updated even when the app is closed.',
@@ -131,7 +132,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           if (provider.pushDenied)
             TextButton(
               onPressed: provider.enablePush,
-              child: const Text('Retry'),
+              child: const AppText('Retry'),
             ),
         ],
       ),
@@ -177,7 +178,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     Row(
                       children: [
                         Expanded(
-                          child: Text(
+                          child: AppText(
                             item.title,
                             style: TextStyle(
                               fontSize: 12.5,
@@ -197,7 +198,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                       ],
                     ),
                     const SizedBox(height: 3),
-                    Text(
+                    AppText(
                       item.body,
                       style: const TextStyle(
                         fontSize: 11,
@@ -208,13 +209,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     const SizedBox(height: 5),
                     Row(
                       children: [
-                        Text(
+                        AppText(
                           compactDate(item.createdAt),
                           style: const TextStyle(fontSize: 9.5, color: AppColors.muted),
                         ),
                         if (item.orderNumber != null) ...[
                           const SizedBox(width: 8),
-                          Text(
+                          AppText(
                             item.orderNumber!,
                             style: const TextStyle(
                               fontSize: 9.5,

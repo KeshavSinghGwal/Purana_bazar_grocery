@@ -13,6 +13,7 @@ import '../../widgets/common.dart';
 import '../location/addresses_screen.dart';
 import '../orders/order_details_screen.dart';
 import 'order_confirmation_screen.dart';
+import '../../core/localization.dart';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({super.key});
@@ -187,7 +188,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     final canPlace = quote?.found == true && address != null && !_placing && !_validating;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Checkout')),
+      appBar: AppBar(title: const AppText('Checkout')),
       body: SafeArea(
         child: PageWidth(
           maxWidth: 820,
@@ -214,7 +215,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                 child: CircularProgressIndicator(strokeWidth: 2.4),
                               ),
                               SizedBox(height: 10),
-                              Text(
+                              AppText(
                                 'Validating shop selection, stock and delivery radius…',
                                 textAlign: TextAlign.center,
                                 style: TextStyle(fontSize: 11.5, color: AppColors.muted),
@@ -236,7 +237,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                     color: AppColors.red, size: 21),
                                 const SizedBox(width: 9),
                                 Expanded(
-                                  child: Text(
+                                  child: AppText(
                                     _error!,
                                     style: const TextStyle(fontSize: 12, color: AppColors.red),
                                   ),
@@ -252,7 +253,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                     : Icons.refresh_rounded,
                                 size: 17,
                               ),
-                              label: Text(address == null
+                              label: AppText(address == null
                                   ? 'Add delivery address'
                                   : 'Validate again'),
                             ),
@@ -269,16 +270,16 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Delivery instructions',
+                          AppText('Delivery instructions',
                               style: Theme.of(context).textTheme.titleSmall),
                           const SizedBox(height: 9),
                           TextField(
                             controller: _note,
                             maxLines: 2,
                             maxLength: 500,
-                            decoration: const InputDecoration(
-                              hintText: 'e.g. Ring the bell, leave at the door…',
-                              counterText: '',
+                            decoration: InputDecoration(
+                              hintText: tr(context, 'e.g. Ring the bell, leave at the door…'),
+                              counterText: tr(context, ''),
                             ),
                           ),
                         ],
@@ -294,7 +295,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                         Icon(Icons.lock_outline_rounded, size: 14, color: AppColors.muted),
                         SizedBox(width: 5),
                         Expanded(
-                          child: Text(
+                          child: AppText(
                             'Prices, stock and the selected shop are revalidated on the server when you place the order.',
                             style: TextStyle(fontSize: 10, color: AppColors.muted),
                           ),
@@ -339,7 +340,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                   color: Colors.white,
                                 ),
                               )
-                            : Text(
+                            : AppText(
                                 quote?.found == true
                                     ? _paymentMethod == 'ONLINE'
                                         ? 'Pay ${rupee(quote!.totalAmount)} securely'
@@ -379,7 +380,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
+                const AppText(
                   'DELIVER TO',
                   style: TextStyle(
                     fontSize: 8.5,
@@ -389,7 +390,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   ),
                 ),
                 const SizedBox(height: 3),
-                Text(
+                AppText(
                   address == null
                       ? 'No delivery address selected'
                       : '${address.label} · ${address.formattedAddress}',
@@ -400,7 +401,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ),
           TextButton(
             onPressed: _chooseAddress,
-            child: Text(address == null ? 'Add' : 'Change'),
+            child: AppText(address == null ? 'Add' : 'Change'),
           ),
         ],
       ),
@@ -421,7 +422,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 const Icon(Icons.search_off_rounded, color: AppColors.red, size: 22),
                 const SizedBox(width: 9),
                 Expanded(
-                  child: Text(
+                  child: AppText(
                     quote.message ?? 'No nearby shop can fulfil the complete cart.',
                     style: const TextStyle(
                       fontSize: 12.5,
@@ -438,7 +439,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               ...quote.unavailableProducts.map(
                 (item) => Padding(
                   padding: const EdgeInsets.only(bottom: 5),
-                  child: Text(
+                  child: AppText(
                     '• ${item.name}: requested ${item.requestedQuantity}, max ${item.maxAvailable}',
                     style: const TextStyle(fontSize: 11, color: AppColors.red),
                   ),
@@ -448,7 +449,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             const SizedBox(height: 8),
             TextButton(
               onPressed: _validate,
-              child: const Text('Check again'),
+              child: const AppText('Check again'),
             ),
           ],
         ),
@@ -470,7 +471,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   const Icon(Icons.storefront_rounded, color: AppColors.green, size: 22),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(
+                    child: AppText(
                       shop.name,
                       style: const TextStyle(
                         fontSize: 15,
@@ -486,7 +487,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 ],
               ),
               const SizedBox(height: 5),
-              Text(
+              AppText(
                 quote.selectedShop != null
                     ? '${shop.address} · ${shop.estimatedDeliveryMinutes} min'
                     : '',
@@ -499,7 +500,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       color: AppColors.green, size: 15),
                   const SizedBox(width: 4),
                   Expanded(
-                    child: Text(
+                    child: AppText(
                       quote.message ??
                           'This shop can fulfil your complete cart without splitting the order.',
                       style: const TextStyle(
@@ -519,7 +520,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Items being fulfilled',
+              AppText('Items being fulfilled',
                   style: Theme.of(context).textTheme.titleSmall),
               const SizedBox(height: 9),
               ...quote.items.map(
@@ -528,12 +529,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                   child: Row(
                     children: [
                       Expanded(
-                        child: Text(
+                        child: AppText(
                           '${line.name} × ${line.requestedQuantity}',
                           style: const TextStyle(fontSize: 12),
                         ),
                       ),
-                      Text(
+                      AppText(
                         rupee(line.lineTotal),
                         style: const TextStyle(
                           fontSize: 12,
@@ -558,7 +559,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Payment method', style: Theme.of(context).textTheme.titleSmall),
+          AppText('Payment method', style: Theme.of(context).textTheme.titleSmall),
           const SizedBox(height: 10),
           _paymentTile(
             value: 'COD',
@@ -586,7 +587,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 Icon(Icons.lock_outline_rounded, size: 14, color: AppColors.muted),
                 SizedBox(width: 5),
                 Expanded(
-                  child: Text(
+                  child: AppText(
                     'Razorpay securely processes the payment. Purana Bazaar never stores your card details.',
                     style: TextStyle(fontSize: 10, height: 1.4, color: AppColors.muted),
                   ),
@@ -629,12 +630,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  AppText(
                     title,
                     style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
                   ),
                   const SizedBox(height: 2),
-                  Text(
+                  AppText(
                     subtitle,
                     style: const TextStyle(fontSize: 10.5, color: AppColors.muted),
                   ),
@@ -660,7 +661,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Bill summary', style: Theme.of(context).textTheme.titleMedium),
+          AppText('Bill summary', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
           InfoRow(label: 'Item subtotal', value: rupee(quote.subtotal)),
           InfoRow(
@@ -676,7 +677,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ),
           if (address != null) ...[
             const SizedBox(height: 8),
-            Text(
+            AppText(
               'Delivering to ${address.formattedAddress}',
               style: const TextStyle(fontSize: 10, height: 1.4, color: AppColors.muted),
             ),

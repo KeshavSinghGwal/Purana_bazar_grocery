@@ -44,6 +44,7 @@ purana-bazaar/
 - Order history/details, retry payment for unpaid online orders, customer cancellation while the order is still cancellable
 - In-app notification centre (bell + badge) and optional Firebase push notifications
 - Reviews after a delivered order from that shop
+- **English and Hindi UI** with a language switcher on the login screen, customer home/profile and role dashboards; the choice is saved on the device
 
 ### Shop owner
 - Registration creates a shop in `PENDING_APPROVAL`; it stays hidden until approved
@@ -583,7 +584,7 @@ Customers can cancel while `PENDING`, `ACCEPTED`, `PREPARING` or `PAYMENT_PENDIN
 ## Verification performed
 
 - `flutter analyze` — no issues.
-- `flutter test` — 15 tests passed (model parsing and formatters).
+- `flutter test` — 22 tests passed (models, formatters and English/Hindi localization).
 - `flutter build web --release` — succeeded.
 - Backend `mvnw test` — 12 integration tests passed against PostgreSQL, including mock Razorpay payment, signature rejection, in-app notification read state and refund-on-cancel.
 - Live API smoke checks against a running backend cover login, home, public shop inventory, admin dashboard, and the full Product Choice/Shop Choice checkout + cancellation path.
@@ -608,6 +609,7 @@ Additional integration coverage verifies the owner status lifecycle, invalid tra
 ## Assumptions and limitations
 
 - The brief mentioned a reference screenshot but none was attached. The UI follows the described green/white, quick-commerce aesthetic and is fully responsive, but is not a pixel match to an unseen reference.
+- The interface is bilingual (English/Hindi) and the choice is stored on the device. API messages and seeded catalog names are translated in the app; text that the backend pushes directly to the operating system (background push notifications) stays in English.
 - Razorpay works with real keys or the built-in mock mode. Live mode requires an HTTPS webhook endpoint and Razorpay's `checkout.js` to be reachable from the customer's browser.
 - Push notifications require Firebase credentials and, on web, a VAPID key and the configured service worker. Without them the in-app notification centre remains available.
 - Delivery partners can accept and complete ready orders; automatic assignment/route optimisation and live GPS tracking are future work.

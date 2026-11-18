@@ -8,6 +8,7 @@ import '../../models/models.dart';
 import '../../state/cart_provider.dart';
 import '../../widgets/common.dart';
 import '../checkout/checkout_screen.dart';
+import '../../core/localization.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -43,16 +44,16 @@ class _CartScreenState extends State<CartScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Clear your cart?'),
-        content: const Text('All items and the selected shopping mode will be removed.'),
+        title: const AppText('Clear your cart?'),
+        content: const AppText('All items and the selected shopping mode will be removed.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Keep items'),
+            child: const AppText('Keep items'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Clear cart', style: TextStyle(color: AppColors.red)),
+            child: const AppText('Clear cart', style: TextStyle(color: AppColors.red)),
           ),
         ],
       ),
@@ -73,12 +74,12 @@ class _CartScreenState extends State<CartScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your cart'),
+        title: const AppText('Your cart'),
         actions: [
           if (!cart.isEmpty)
             TextButton(
               onPressed: provider.mutating ? null : _clear,
-              child: const Text('Clear'),
+              child: const AppText('Clear'),
             ),
           const SizedBox(width: 6),
         ],
@@ -124,7 +125,7 @@ class _CartScreenState extends State<CartScreen> {
                                           color: AppColors.red, size: 19),
                                       SizedBox(width: 8),
                                       Expanded(
-                                        child: Text(
+                                        child: AppText(
                                           'Some items no longer have enough stock. Adjust quantities before checkout.',
                                           style: TextStyle(fontSize: 11.5, color: AppColors.red),
                                         ),
@@ -144,7 +145,7 @@ class _CartScreenState extends State<CartScreen> {
                               OutlinedButton.icon(
                                 onPressed: () => Navigator.of(context).pop(),
                                 icon: const Icon(Icons.add_rounded, size: 18),
-                                label: const Text('Add more items'),
+                                label: const AppText('Add more items'),
                               ),
                               const SizedBox(height: 20),
                               _billCard(cart),
@@ -172,12 +173,12 @@ class _CartScreenState extends State<CartScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                AppText(
                   shop.name,
                   style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800),
                 ),
                 const SizedBox(height: 2),
-                Text(
+                AppText(
                   'Shop Choice · ${shop.estimatedDeliveryMinutes} min'
                   '${shop.distanceKm == null ? '' : ' · ${shop.distanceKm!.toStringAsFixed(1)} km'}',
                   style: const TextStyle(fontSize: 10.5, color: AppColors.muted),
@@ -202,7 +203,7 @@ class _CartScreenState extends State<CartScreen> {
           Icon(Icons.auto_awesome_rounded, color: AppColors.green, size: 21),
           SizedBox(width: 9),
           Expanded(
-            child: Text(
+            child: AppText(
               'Product Choice — prices below are the best nearby prices. At checkout, one eligible shop is selected for the complete cart and the final bill is revalidated.',
               style: TextStyle(fontSize: 11.5, height: 1.45, color: AppColors.darkGreen),
             ),
@@ -231,7 +232,7 @@ class _CartScreenState extends State<CartScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          AppText(
                             item.name,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
@@ -242,7 +243,7 @@ class _CartScreenState extends State<CartScreen> {
                             ),
                           ),
                           const SizedBox(height: 2),
-                          Text(
+                          AppText(
                             '${item.unit} · ${rupee(item.unitPrice)} each',
                             style: const TextStyle(fontSize: 10.5, color: AppColors.muted),
                           ),
@@ -258,7 +259,7 @@ class _CartScreenState extends State<CartScreen> {
                 ),
                 if (!item.available) ...[
                   const SizedBox(height: 3),
-                  Text(
+                  AppText(
                     'Only ${item.availableQuantity} available',
                     style: const TextStyle(
                       fontSize: 10,
@@ -277,7 +278,7 @@ class _CartScreenState extends State<CartScreen> {
                       onDecrement: () => _update(item, item.quantity - 1),
                     ),
                     const Spacer(),
-                    Text(
+                    AppText(
                       rupee(item.lineTotal),
                       style: const TextStyle(
                         fontSize: 15,
@@ -301,7 +302,7 @@ class _CartScreenState extends State<CartScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Bill details', style: Theme.of(context).textTheme.titleMedium),
+          AppText('Bill details', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 8),
           InfoRow(label: 'Item subtotal', value: rupee(cart.subtotal)),
           InfoRow(
@@ -329,7 +330,7 @@ class _CartScreenState extends State<CartScreen> {
               ),
             ),
             const SizedBox(height: 6),
-            Text(
+            AppText(
               'Add ${rupee(remaining)} more for free delivery',
               style: const TextStyle(
                 fontSize: 10.5,
@@ -338,7 +339,7 @@ class _CartScreenState extends State<CartScreen> {
               ),
             ),
           ] else
-            const Text(
+            const AppText(
               'You unlocked free delivery.',
               style: TextStyle(
                 fontSize: 10.5,
@@ -347,7 +348,7 @@ class _CartScreenState extends State<CartScreen> {
               ),
             ),
           const SizedBox(height: 8),
-          const Text(
+          const AppText(
             'Final prices and delivery are confirmed by the server at checkout.',
             style: TextStyle(fontSize: 9.5, color: AppColors.soft),
           ),
@@ -370,7 +371,7 @@ class _CartScreenState extends State<CartScreen> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
+                AppText(
                   rupee(cart.estimatedTotal),
                   style: const TextStyle(
                     fontSize: 20,
@@ -378,7 +379,7 @@ class _CartScreenState extends State<CartScreen> {
                     letterSpacing: -0.4,
                   ),
                 ),
-                Text(
+                AppText(
                   '${cart.itemCount} item${cart.itemCount == 1 ? '' : 's'} · incl. delivery',
                   style: const TextStyle(fontSize: 10.5, color: AppColors.muted),
                 ),
@@ -393,7 +394,7 @@ class _CartScreenState extends State<CartScreen> {
                   : () => Navigator.of(context).push(
                         MaterialPageRoute(builder: (_) => const CheckoutScreen()),
                       ),
-              child: const Text('Proceed to checkout'),
+              child: const AppText('Proceed to checkout'),
             ),
           ),
         ],

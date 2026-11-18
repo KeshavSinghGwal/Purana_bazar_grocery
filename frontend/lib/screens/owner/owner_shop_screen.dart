@@ -7,6 +7,7 @@ import '../../core/formatters.dart';
 import '../../models/models.dart';
 import '../../state/auth_provider.dart';
 import '../../widgets/common.dart';
+import '../../core/localization.dart';
 
 class OwnerShopScreen extends StatefulWidget {
   const OwnerShopScreen({super.key});
@@ -86,7 +87,7 @@ class _OwnerShopScreenState extends State<OwnerShopScreen> {
       barrierDismissible: false,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: const Text('Edit shop details'),
+          title: const AppText('Edit shop details'),
           content: Form(
             key: formKey,
             child: SizedBox(
@@ -97,15 +98,15 @@ class _OwnerShopScreenState extends State<OwnerShopScreen> {
                   children: [
                     TextFormField(
                       controller: name,
-                      decoration: const InputDecoration(labelText: 'Shop name'),
+                      decoration: InputDecoration(labelText: tr(context, 'Shop name')),
                       validator: _required,
                     ),
                     const SizedBox(height: 11),
                     TextFormField(
                       controller: description,
                       maxLines: 2,
-                      decoration: const InputDecoration(
-                        labelText: 'Description',
+                      decoration: InputDecoration(
+                        labelText: tr(context, 'Description'),
                         alignLabelWithHint: true,
                       ),
                     ),
@@ -113,8 +114,8 @@ class _OwnerShopScreenState extends State<OwnerShopScreen> {
                     TextFormField(
                       controller: address,
                       maxLines: 2,
-                      decoration: const InputDecoration(
-                        labelText: 'Address',
+                      decoration: InputDecoration(
+                        labelText: tr(context, 'Address'),
                         alignLabelWithHint: true,
                       ),
                       validator: _required,
@@ -127,11 +128,11 @@ class _OwnerShopScreenState extends State<OwnerShopScreen> {
                             controller: radius,
                             keyboardType:
                                 const TextInputType.numberWithOptions(decimal: true),
-                            decoration: const InputDecoration(labelText: 'Radius (km)'),
+                            decoration: InputDecoration(labelText: tr(context, 'Radius (km)')),
                             validator: (value) {
                               final parsed = double.tryParse(value ?? '');
                               if (parsed == null || parsed < 0.5 || parsed > 50) {
-                                return '0.5–50 km';
+                                return AppLocalizations.current.tr('0.5–50 km');
                               }
                               return null;
                             },
@@ -142,11 +143,11 @@ class _OwnerShopScreenState extends State<OwnerShopScreen> {
                           child: TextFormField(
                             controller: eta,
                             keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(labelText: 'ETA (min)'),
+                            decoration: InputDecoration(labelText: tr(context, 'ETA (min)')),
                             validator: (value) {
                               final parsed = int.tryParse(value ?? '');
                               if (parsed == null || parsed < 5 || parsed > 240) {
-                                return '5–240';
+                                return AppLocalizations.current.tr('5–240');
                               }
                               return null;
                             },
@@ -157,13 +158,13 @@ class _OwnerShopScreenState extends State<OwnerShopScreen> {
                     const SizedBox(height: 11),
                     TextFormField(
                       controller: phone,
-                      decoration: const InputDecoration(labelText: 'Shop phone'),
+                      decoration: InputDecoration(labelText: tr(context, 'Shop phone')),
                     ),
                     const SizedBox(height: 5),
                     SwitchListTile.adaptive(
                       contentPadding: EdgeInsets.zero,
                       activeTrackColor: AppColors.green,
-                      title: const Text(
+                      title: const AppText(
                         'Delivery available',
                         style: TextStyle(fontSize: 12.5, fontWeight: FontWeight.w600),
                       ),
@@ -179,7 +180,7 @@ class _OwnerShopScreenState extends State<OwnerShopScreen> {
           actions: [
             TextButton(
               onPressed: busy ? null : () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
+              child: const AppText('Cancel'),
             ),
             ElevatedButton(
               onPressed: busy
@@ -220,7 +221,7 @@ class _OwnerShopScreenState extends State<OwnerShopScreen> {
                         color: Colors.white,
                       ),
                     )
-                  : const Text('Save changes'),
+                  : const AppText('Save changes'),
             ),
           ],
         ),
@@ -239,16 +240,16 @@ class _OwnerShopScreenState extends State<OwnerShopScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Sign out?'),
-        content: const Text('You will need to sign in again to manage your shop.'),
+        title: const AppText('Sign out?'),
+        content: const AppText('You will need to sign in again to manage your shop.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Stay'),
+            child: const AppText('Stay'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Sign out', style: TextStyle(color: AppColors.red)),
+            child: const AppText('Sign out', style: TextStyle(color: AppColors.red)),
           ),
         ],
       ),
@@ -264,10 +265,10 @@ class _OwnerShopScreenState extends State<OwnerShopScreen> {
     final user = context.watch<AuthProvider>().user;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My shop'),
+        title: const AppText('My shop'),
         actions: [
           IconButton(
-            tooltip: 'Refresh',
+            tooltip: context.tr('Refresh'),
             onPressed: _load,
             icon: const Icon(Icons.refresh_rounded),
           ),
@@ -311,7 +312,7 @@ class _OwnerShopScreenState extends State<OwnerShopScreen> {
                                           Row(
                                             children: [
                                               Expanded(
-                                                child: Text(
+                                                child: AppText(
                                                   shop.name,
                                                   style: Theme.of(context)
                                                       .textTheme
@@ -322,7 +323,7 @@ class _OwnerShopScreenState extends State<OwnerShopScreen> {
                                             ],
                                           ),
                                           const SizedBox(height: 5),
-                                          Text(
+                                          AppText(
                                             shop.address,
                                             style: const TextStyle(
                                               fontSize: 11.5,
@@ -372,7 +373,7 @@ class _OwnerShopScreenState extends State<OwnerShopScreen> {
                                           : const Color(0xFFF3E3BC),
                                     ),
                                   ),
-                                  child: Text(
+                                  child: AppText(
                                     shop.approvalStatus == 'REJECTED'
                                         ? 'Rejected: ${shop.rejectionReason ?? 'Contact support for details.'}'
                                         : 'Your shop is awaiting approval. It stays hidden from customers until approved.',
@@ -400,7 +401,7 @@ class _OwnerShopScreenState extends State<OwnerShopScreen> {
                                           child: Column(
                                             crossAxisAlignment: CrossAxisAlignment.start,
                                             children: [
-                                              Text(
+                                              AppText(
                                                 'Accepting orders',
                                                 style: TextStyle(
                                                   fontSize: 13,
@@ -408,7 +409,7 @@ class _OwnerShopScreenState extends State<OwnerShopScreen> {
                                                 ),
                                               ),
                                               SizedBox(height: 2),
-                                              Text(
+                                              AppText(
                                                 'Close the shop for a short break without losing settings.',
                                                 style: TextStyle(
                                                   fontSize: 10.5,
@@ -431,7 +432,7 @@ class _OwnerShopScreenState extends State<OwnerShopScreen> {
                                         const Icon(Icons.schedule_rounded,
                                             color: AppColors.muted, size: 18),
                                         const SizedBox(width: 7),
-                                        Text(
+                                        AppText(
                                           '${friendlyTime(shop.openingTime)} – ${friendlyTime(shop.closingTime)}',
                                           style: const TextStyle(
                                             fontSize: 11.5,
@@ -442,7 +443,7 @@ class _OwnerShopScreenState extends State<OwnerShopScreen> {
                                         TextButton.icon(
                                           onPressed: _editShop,
                                           icon: const Icon(Icons.edit_outlined, size: 16),
-                                          label: const Text('Edit shop'),
+                                          label: const AppText('Edit shop'),
                                         ),
                                       ],
                                     ),
@@ -458,7 +459,7 @@ class _OwnerShopScreenState extends State<OwnerShopScreen> {
                                       CircleAvatar(
                                         radius: 21,
                                         backgroundColor: AppColors.mint,
-                                        child: Text(
+                                        child: AppText(
                                           initials(user.name),
                                           style: const TextStyle(
                                             fontSize: 13,
@@ -472,14 +473,14 @@ class _OwnerShopScreenState extends State<OwnerShopScreen> {
                                         child: Column(
                                           crossAxisAlignment: CrossAxisAlignment.start,
                                           children: [
-                                            Text(
+                                            AppText(
                                               user.name,
                                               style: const TextStyle(
                                                 fontSize: 13,
                                                 fontWeight: FontWeight.w700,
                                               ),
                                             ),
-                                            Text(
+                                            AppText(
                                               user.email,
                                               style: const TextStyle(
                                                 fontSize: 10.5,
@@ -498,7 +499,7 @@ class _OwnerShopScreenState extends State<OwnerShopScreen> {
                                 onPressed: _logout,
                                 icon: const Icon(Icons.logout_rounded,
                                     size: 18, color: AppColors.red),
-                                label: const Text(
+                                label: const AppText(
                                   'Sign out',
                                   style: TextStyle(color: AppColors.red),
                                 ),

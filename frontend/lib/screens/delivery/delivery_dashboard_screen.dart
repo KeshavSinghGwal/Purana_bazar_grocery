@@ -7,7 +7,9 @@ import '../../models/models.dart';
 import '../../state/auth_provider.dart';
 import '../../state/delivery_provider.dart';
 import '../../widgets/common.dart';
+import '../../widgets/language_selector.dart';
 import 'delivery_widgets.dart';
+import '../../core/localization.dart';
 
 class DeliveryDashboardScreen extends StatefulWidget {
   const DeliveryDashboardScreen({super.key});
@@ -34,15 +36,16 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Delivery desk'),
+        title: const AppText('Delivery desk'),
         actions: [
+          const LanguageButton(),
           IconButton(
-            tooltip: 'Refresh',
+            tooltip: context.tr('Refresh'),
             onPressed: provider.load,
             icon: const Icon(Icons.refresh_rounded),
           ),
           IconButton(
-            tooltip: 'Sign out',
+            tooltip: context.tr('Sign out'),
             onPressed: auth.logout,
             icon: const Icon(Icons.logout_rounded),
           ),
@@ -101,7 +104,7 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
                                   ),
                                   const SizedBox(width: 12),
                                   const Expanded(
-                                    child: Text(
+                                    child: AppText(
                                       'No active delivery. Accept a pickup from the Available tab to get started.',
                                       style: TextStyle(
                                         fontSize: 12,
@@ -126,7 +129,7 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
                             ),
                           const SizedBox(height: 12),
                           const Center(
-                            child: Text(
+                            child: AppText(
                               'Only hand over an order after collecting payment for COD deliveries.',
                               textAlign: TextAlign.center,
                               style: TextStyle(fontSize: 10, color: AppColors.soft),
@@ -184,7 +187,7 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
                     color: Colors.white.withValues(alpha: 0.16),
                     borderRadius: BorderRadius.circular(7),
                   ),
-                  child: const Text(
+                  child: const AppText(
                     'ON DUTY',
                     style: TextStyle(
                       color: Colors.white,
@@ -195,7 +198,7 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
                   ),
                 ),
                 const SizedBox(height: 11),
-                Text(
+                AppText(
                   'Hello, $firstName.',
                   style: const TextStyle(
                     color: Colors.white,
@@ -206,7 +209,7 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
                   ),
                 ),
                 const SizedBox(height: 5),
-                Text(
+                AppText(
                   available == 0
                       ? 'No pickups waiting right now. We will keep this desk fresh.'
                       : '$available ${available == 1 ? 'order is' : 'orders are'} waiting for pickup nearby.',
@@ -275,7 +278,7 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
                       Icon(item.$3, size: 18, color: item.$4),
                       const Spacer(),
                       if (index == 0)
-                        Text(
+                        AppText(
                           'LIVE',
                           style: TextStyle(
                             fontSize: 8,
@@ -286,11 +289,11 @@ class _DeliveryDashboardScreenState extends State<DeliveryDashboardScreen> {
                         ),
                     ],
                   ),
-                  Text(
+                  AppText(
                     item.$2,
                     style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900),
                   ),
-                  Text(
+                  AppText(
                     item.$1,
                     style: const TextStyle(fontSize: 10, color: AppColors.muted),
                   ),

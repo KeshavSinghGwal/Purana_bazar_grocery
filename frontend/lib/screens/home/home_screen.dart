@@ -9,12 +9,14 @@ import '../../state/cart_provider.dart';
 import '../../state/location_provider.dart';
 import '../../widgets/cart_button.dart';
 import '../../widgets/common.dart';
+import '../../widgets/language_selector.dart';
 import '../../widgets/notification_button.dart';
 import '../location/addresses_screen.dart';
 import '../product/product_choice_screen.dart';
 import '../product/product_details_screen.dart';
 import '../shop/shop_choice_screen.dart';
 import '../shop/shop_details_screen.dart';
+import '../../core/localization.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -121,6 +123,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Row(
                   children: [
                     const Expanded(child: AppLogo(small: true)),
+                    const LanguageButton(),
                     const NotificationButton(),
                     const CartButton(),
                     const SizedBox(width: 2),
@@ -149,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
+                              const AppText(
                                 'DELIVERING TO',
                                 style: TextStyle(
                                   fontSize: 8.5,
@@ -159,7 +162,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ),
                               const SizedBox(height: 2),
-                              Text(
+                              AppText(
                                 address == null
                                     ? 'Set your delivery location'
                                     : '${address.label} · ${address.addressLine}',
@@ -337,7 +340,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   _deliveryBanner(),
                   const SizedBox(height: 22),
                   const Center(
-                    child: Text(
+                    child: AppText(
                       'Locally sourced · Shop-verified stock · Delivery radius enforced',
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 10, color: AppColors.soft),
@@ -366,7 +369,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Icon(Icons.search_rounded, color: AppColors.muted, size: 22),
           SizedBox(width: 9),
           Expanded(
-            child: Text(
+            child: AppText(
               'Search milk, atta, fruits and more…',
               style: TextStyle(fontSize: 13, color: AppColors.soft),
             ),
@@ -424,7 +427,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: Colors.white.withValues(alpha: 0.16),
                   borderRadius: BorderRadius.circular(7),
                 ),
-                child: const Text(
+                child: const AppText(
                   'NEIGHBOURHOOD GROCERY',
                   style: TextStyle(
                     color: Colors.white,
@@ -435,7 +438,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const SizedBox(height: 12),
-              Text(
+              AppText(
                 address == null
                     ? 'Groceries from shops\njust around the corner.'
                     : 'Delivered from a shop\n${address.label == 'Home' ? 'near your home' : 'near you'}.',
@@ -448,7 +451,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const SizedBox(height: 9),
-              Text(
+              AppText(
                 '${_data?.totalShops ?? 0} approved shops · ${_data?.totalProducts ?? 0} in-stock products',
                 style: TextStyle(
                   color: Colors.white.withValues(alpha: 0.78),
@@ -485,7 +488,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Icon(icon, color: Colors.white, size: 13),
             const SizedBox(width: 4),
-            Text(
+            AppText(
               label,
               style: const TextStyle(
                 color: Colors.white,
@@ -531,7 +534,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
           const SizedBox(height: 13),
-          Text(
+          AppText(
             eyebrow,
             style: TextStyle(
               fontSize: 8.5,
@@ -541,7 +544,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           const SizedBox(height: 4),
-          Text(
+          AppText(
             title,
             style: const TextStyle(
               fontSize: 16,
@@ -551,7 +554,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           const SizedBox(height: 6),
-          Text(
+          AppText(
             description,
             style: const TextStyle(
               fontSize: 11.5,
@@ -627,7 +630,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                AppText(
                   'Free delivery above ₹199',
                   style: TextStyle(
                     fontSize: 14,
@@ -636,7 +639,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 SizedBox(height: 3),
-                Text(
+                AppText(
                   'A flat ₹19 delivery fee applies to smaller orders. The nearest eligible shop is chosen at checkout.',
                   style: TextStyle(fontSize: 11, height: 1.4, color: AppColors.muted),
                 ),

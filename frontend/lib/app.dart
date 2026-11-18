@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
 import 'core/app_theme.dart';
+import 'core/localization.dart';
 import 'screens/admin/admin_shell.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/customer_shell.dart';
@@ -9,6 +11,7 @@ import 'screens/delivery/delivery_shell.dart';
 import 'screens/owner/owner_shell.dart';
 import 'screens/splash_screen.dart';
 import 'state/auth_provider.dart';
+import 'state/language_provider.dart';
 import 'widgets/common.dart';
 
 /// Used by foreground FCM handlers to show a snackbar from outside the widget tree.
@@ -20,10 +23,19 @@ class PuranaBazaarApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final language = context.watch<LanguageProvider>();
     return MaterialApp(
       title: 'Purana Bazaar',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
+      locale: language.locale,
+      supportedLocales: const [Locale('en'), Locale('hi')],
+      localizationsDelegates: const [
+        AppLocalizationsDelegate(),
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       scaffoldMessengerKey: appMessengerKey,
       home: const AuthGate(),
     );
@@ -80,7 +92,7 @@ class _UnsupportedRoleScreen extends StatelessWidget {
               OutlinedButton.icon(
                 onPressed: auth.logout,
                 icon: const Icon(Icons.logout_rounded, size: 18),
-                label: const Text('Sign out'),
+                label: const AppText('Sign out'),
               ),
             ],
           ),

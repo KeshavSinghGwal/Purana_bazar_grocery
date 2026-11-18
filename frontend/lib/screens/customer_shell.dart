@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../state/cart_provider.dart';
 import '../state/location_provider.dart';
+import '../core/localization.dart';
 import 'home/home_screen.dart';
 import 'orders/order_history_screen.dart';
 import 'profile/profile_screen.dart';
@@ -52,31 +53,31 @@ class _CustomerShellState extends State<CustomerShell> {
             // The screens refresh on pull; cart badge stays current through its provider.
           }
         },
-        destinations: const [
+        destinations: [
           NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home_rounded),
-            label: 'Home',
+            icon: const Icon(Icons.home_outlined),
+            selectedIcon: const Icon(Icons.home_rounded),
+            label: context.tr('Home'),
           ),
           NavigationDestination(
-            icon: Icon(Icons.storefront_outlined),
-            selectedIcon: Icon(Icons.storefront_rounded),
-            label: 'Shops',
+            icon: const Icon(Icons.storefront_outlined),
+            selectedIcon: const Icon(Icons.storefront_rounded),
+            label: context.tr('Shops'),
           ),
           NavigationDestination(
-            icon: Icon(Icons.receipt_long_outlined),
-            selectedIcon: Icon(Icons.receipt_long_rounded),
-            label: 'Orders',
+            icon: const Icon(Icons.receipt_long_outlined),
+            selectedIcon: const Icon(Icons.receipt_long_rounded),
+            label: context.tr('Orders'),
           ),
           NavigationDestination(
-            icon: Icon(Icons.favorite_border_rounded),
-            selectedIcon: Icon(Icons.favorite_rounded),
-            label: 'Wishlist',
+            icon: const Icon(Icons.favorite_border_rounded),
+            selectedIcon: const Icon(Icons.favorite_rounded),
+            label: context.tr('Wishlist'),
           ),
           NavigationDestination(
-            icon: Icon(Icons.person_outline_rounded),
-            selectedIcon: Icon(Icons.person_rounded),
-            label: 'Profile',
+            icon: const Icon(Icons.person_outline_rounded),
+            selectedIcon: const Icon(Icons.person_rounded),
+            label: context.tr('Profile'),
           ),
         ],
       ),

@@ -5,8 +5,10 @@ import '../../core/app_theme.dart';
 import '../../core/formatters.dart';
 import '../../models/models.dart';
 import '../../widgets/common.dart';
+import '../../widgets/language_selector.dart';
 import 'owner_inventory_screen.dart';
 import 'owner_orders_screen.dart';
+import '../../core/localization.dart';
 
 class OwnerDashboardScreen extends StatefulWidget {
   const OwnerDashboardScreen({super.key});
@@ -49,10 +51,11 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
     final data = _data;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Owner dashboard'),
+        title: const AppText('Owner dashboard'),
         actions: [
+          const LanguageButton(),
           IconButton(
-            tooltip: 'Refresh',
+            tooltip: context.tr('Refresh'),
             onPressed: _load,
             icon: const Icon(Icons.refresh_rounded),
           ),
@@ -136,7 +139,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                                         ),
                                       ),
                                       icon: const Icon(Icons.inventory_2_outlined, size: 18),
-                                      label: const Text('Manage inventory'),
+                                      label: const AppText('Manage inventory'),
                                     ),
                                   ),
                                   const SizedBox(width: 10),
@@ -148,7 +151,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                                         ),
                                       ),
                                       icon: const Icon(Icons.receipt_long_outlined, size: 18),
-                                      label: const Text('Manage orders'),
+                                      label: const AppText('Manage orders'),
                                     ),
                                   ),
                                 ],
@@ -178,7 +181,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                                           color: AppColors.red, size: 19),
                                       const SizedBox(width: 8),
                                       Expanded(
-                                        child: Text(
+                                        child: AppText(
                                           '${data.outOfStockProducts} listing${data.outOfStockProducts == 1 ? '' : 's'} out of stock. Update stock to stay visible.',
                                           style: const TextStyle(
                                             fontSize: 11.5,
@@ -198,7 +201,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                                           color: AppColors.muted, size: 24),
                                       const SizedBox(width: 10),
                                       Expanded(
-                                        child: Text(
+                                        child: AppText(
                                           'No orders yet. Once a customer checks out, their order will appear here for acceptance.',
                                           style: Theme.of(context).textTheme.bodySmall,
                                         ),
@@ -237,7 +240,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    const AppText(
                       'YOUR SHOP',
                       style: TextStyle(
                         fontSize: 8.5,
@@ -247,7 +250,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                       ),
                     ),
                     const SizedBox(height: 4),
-                    Text(
+                    AppText(
                       data.shopName,
                       style: const TextStyle(
                         color: Colors.white,
@@ -265,7 +268,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                   color: Colors.white.withValues(alpha: 0.16),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Text(
+                child: AppText(
                   statusLabel(data.operationalStatus),
                   style: const TextStyle(
                     color: Colors.white,
@@ -277,7 +280,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
             ],
           ),
           const SizedBox(height: 8),
-          Text(
+          AppText(
             data.address,
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.75),
@@ -314,7 +317,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
           children: [
             Icon(icon, color: Colors.white, size: 13),
             const SizedBox(width: 4),
-            Text(
+            AppText(
               text,
               style: const TextStyle(
                 color: Colors.white,
@@ -354,7 +357,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                AppText(
                   rejected ? 'Shop registration rejected' : 'Waiting for admin approval',
                   style: TextStyle(
                     fontSize: 13,
@@ -363,7 +366,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                   ),
                 ),
                 const SizedBox(height: 3),
-                Text(
+                AppText(
                   rejected
                       ? 'Your shop is hidden from customers. Contact support or register again with corrected details.'
                       : 'Your shop is hidden from customers until an administrator approves it. You can prepare inventory now.',
@@ -399,7 +402,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
               child: Icon(icon, color: color, size: 18),
             ),
             const SizedBox(height: 11),
-            Text(
+            AppText(
               value,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -410,7 +413,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
               ),
             ),
             const SizedBox(height: 2),
-            Text(
+            AppText(
               label,
               style: const TextStyle(fontSize: 10.5, color: AppColors.muted),
             ),
@@ -444,12 +447,12 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                AppText(
                   order.orderNumber,
                   style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800),
                 ),
                 const SizedBox(height: 2),
-                Text(
+                AppText(
                   '${order.customerName} · ${order.items.length} items',
                   style: const TextStyle(fontSize: 10.5, color: AppColors.muted),
                 ),
@@ -461,7 +464,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
             children: [
               StatusPill(status: order.orderStatus),
               const SizedBox(height: 3),
-              Text(
+              AppText(
                 rupee(order.totalAmount),
                 style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800),
               ),
@@ -502,7 +505,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: Text(
+                    child: AppText(
                       order.orderNumber,
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
@@ -511,12 +514,12 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                 ],
               ),
               const SizedBox(height: 5),
-              Text(
+              AppText(
                 '${order.customerName}${order.customerPhone == null ? '' : ' · ${order.customerPhone}'}',
                 style: const TextStyle(fontSize: 11.5, color: AppColors.muted),
               ),
               const SizedBox(height: 12),
-              Text(order.deliveryAddress, style: const TextStyle(fontSize: 12)),
+              AppText(order.deliveryAddress, style: const TextStyle(fontSize: 12)),
               const Divider(height: 24),
               ...order.items.map(
                 (item) => Padding(
@@ -524,12 +527,12 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                   child: Row(
                     children: [
                       Expanded(
-                        child: Text(
+                        child: AppText(
                           '${item.productName} × ${item.quantity}',
                           style: const TextStyle(fontSize: 12),
                         ),
                       ),
-                      Text(
+                      AppText(
                         rupee(item.totalPrice),
                         style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
                       ),
@@ -546,7 +549,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
               InfoRow(label: 'Total', value: rupee(order.totalAmount), bold: true),
               if (order.customerNote != null) ...[
                 const SizedBox(height: 10),
-                Text(
+                AppText(
                   'Customer note: ${order.customerNote}',
                   style: const TextStyle(fontSize: 11, color: AppColors.muted),
                 ),
@@ -561,7 +564,7 @@ class _OwnerDashboardScreenState extends State<OwnerDashboardScreen> {
                       MaterialPageRoute(builder: (_) => const OwnerOrdersScreen()),
                     );
                   },
-                  child: const Text('Manage order status'),
+                  child: const AppText('Manage order status'),
                 ),
               ),
             ],

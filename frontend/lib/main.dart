@@ -6,6 +6,7 @@ import 'app.dart';
 import 'core/api_client.dart';
 import 'state/auth_provider.dart';
 import 'state/cart_provider.dart';
+import 'state/language_provider.dart';
 import 'state/location_provider.dart';
 import 'state/notification_provider.dart';
 
@@ -17,6 +18,7 @@ Future<void> main() async {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => LanguageProvider(preferences)),
         ChangeNotifierProvider(create: (_) => AuthProvider(preferences)),
         ChangeNotifierProvider(
           create: (context) =>

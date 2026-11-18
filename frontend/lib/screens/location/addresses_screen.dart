@@ -7,6 +7,7 @@ import '../../core/formatters.dart';
 import '../../models/models.dart';
 import '../../state/location_provider.dart';
 import '../../widgets/common.dart';
+import '../../core/localization.dart';
 
 class AddressesScreen extends StatefulWidget {
   const AddressesScreen({super.key, this.selectionMode = false});
@@ -42,16 +43,16 @@ class _AddressesScreenState extends State<AddressesScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete address?'),
-        content: Text('Remove ${address.label} from your saved addresses?'),
+        title: const AppText('Delete address?'),
+        content: AppText('Remove ${address.label} from your saved addresses?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Keep'),
+            child: const AppText('Keep'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete', style: TextStyle(color: AppColors.red)),
+            child: const AppText('Delete', style: TextStyle(color: AppColors.red)),
           ),
         ],
       ),
@@ -79,10 +80,10 @@ class _AddressesScreenState extends State<AddressesScreen> {
     final location = context.watch<LocationProvider>();
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.selectionMode ? 'Choose delivery address' : 'Saved addresses'),
+        title: AppText(widget.selectionMode ? 'Choose delivery address' : 'Saved addresses'),
         actions: [
           IconButton(
-            tooltip: 'Add address',
+            tooltip: context.tr('Add address'),
             onPressed: () => _openForm(),
             icon: const Icon(Icons.add_rounded),
           ),
@@ -137,7 +138,7 @@ class _AddressesScreenState extends State<AddressesScreen> {
                                         color: AppColors.green, size: 22),
                                     SizedBox(width: 11),
                                     Expanded(
-                                      child: Text(
+                                      child: AppText(
                                         'We use your address to find eligible shops and calculate the nearest-shop delivery.',
                                         style: TextStyle(
                                           fontSize: 12,
@@ -160,7 +161,7 @@ class _AddressesScreenState extends State<AddressesScreen> {
                               OutlinedButton.icon(
                                 onPressed: () => _openForm(),
                                 icon: const Icon(Icons.add_location_alt_outlined),
-                                label: const Text('Add another address'),
+                                label: const AppText('Add another address'),
                               ),
                             ],
                           ),
@@ -206,7 +207,7 @@ class _AddressesScreenState extends State<AddressesScreen> {
                 children: [
                   Row(
                     children: [
-                      Text(
+                      AppText(
                         address.label,
                         style: const TextStyle(
                           fontSize: 14,
@@ -222,7 +223,7 @@ class _AddressesScreenState extends State<AddressesScreen> {
                             color: AppColors.mint,
                             borderRadius: BorderRadius.circular(5),
                           ),
-                          child: const Text(
+                          child: const AppText(
                             'DEFAULT',
                             style: TextStyle(
                               fontSize: 8,
@@ -236,7 +237,7 @@ class _AddressesScreenState extends State<AddressesScreen> {
                     ],
                   ),
                   const SizedBox(height: 3),
-                  Text(
+                  AppText(
                     address.formattedAddress,
                     style: const TextStyle(fontSize: 12, height: 1.4, color: AppColors.muted),
                   ),
@@ -251,7 +252,7 @@ class _AddressesScreenState extends State<AddressesScreen> {
                             minimumSize: const Size(0, 26),
                             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                           ),
-                          child: const Text(
+                          child: const AppText(
                             'Set as default',
                             style: TextStyle(fontSize: 11),
                           ),
@@ -259,13 +260,13 @@ class _AddressesScreenState extends State<AddressesScreen> {
                       const Spacer(),
                       IconButton(
                         visualDensity: VisualDensity.compact,
-                        tooltip: 'Edit',
+                        tooltip: context.tr('Edit'),
                         onPressed: () => _openForm(address: address),
                         icon: const Icon(Icons.edit_outlined, size: 18),
                       ),
                       IconButton(
                         visualDensity: VisualDensity.compact,
-                        tooltip: 'Delete',
+                        tooltip: context.tr('Delete'),
                         onPressed: () => _delete(address),
                         icon: const Icon(Icons.delete_outline_rounded,
                             size: 18, color: AppColors.red),
@@ -364,7 +365,7 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.address == null ? 'Add address' : 'Edit address')),
+      appBar: AppBar(title: AppText(widget.address == null ? 'Add address' : 'Edit address')),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(18, 12, 18, 32),
@@ -382,9 +383,9 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
                           TextFormField(
                             controller: _label,
                             textCapitalization: TextCapitalization.words,
-                            decoration: const InputDecoration(
-                              labelText: 'Label',
-                              hintText: 'Home, Office, Parents…',
+                            decoration: InputDecoration(
+                              labelText: tr(context, 'Label'),
+                              hintText: tr(context, 'Home, Office, Parents…'),
                             ),
                           ),
                           const SizedBox(height: 13),
@@ -392,8 +393,8 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
                             controller: _line,
                             maxLines: 2,
                             textCapitalization: TextCapitalization.words,
-                            decoration: const InputDecoration(
-                              labelText: 'House / street / area',
+                            decoration: InputDecoration(
+                              labelText: tr(context, 'House / street / area'),
                               alignLabelWithHint: true,
                             ),
                             validator: _required,
@@ -404,7 +405,7 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
                               Expanded(
                                 child: TextFormField(
                                   controller: _city,
-                                  decoration: const InputDecoration(labelText: 'City'),
+                                  decoration: InputDecoration(labelText: tr(context, 'City')),
                                   validator: _required,
                                 ),
                               ),
@@ -412,7 +413,7 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
                               Expanded(
                                 child: TextFormField(
                                   controller: _state,
-                                  decoration: const InputDecoration(labelText: 'State'),
+                                  decoration: InputDecoration(labelText: tr(context, 'State')),
                                   validator: _required,
                                 ),
                               ),
@@ -422,11 +423,11 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
                           TextFormField(
                             controller: _postal,
                             keyboardType: TextInputType.number,
-                            decoration: const InputDecoration(labelText: 'PIN code'),
+                            decoration: InputDecoration(labelText: tr(context, 'PIN code')),
                             validator: (value) {
                               final text = value?.trim() ?? '';
                               if (text.length < 4 || text.length > 10) {
-                                return 'Enter a valid PIN code';
+                                return AppLocalizations.current.tr('Enter a valid PIN code');
                               }
                               return null;
                             },
@@ -439,7 +440,7 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
                                   controller: _lat,
                                   keyboardType:
                                       const TextInputType.numberWithOptions(decimal: true),
-                                  decoration: const InputDecoration(labelText: 'Latitude'),
+                                  decoration: InputDecoration(labelText: tr(context, 'Latitude')),
                                   validator: _coordinate,
                                 ),
                               ),
@@ -449,7 +450,7 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
                                   controller: _lng,
                                   keyboardType:
                                       const TextInputType.numberWithOptions(decimal: true),
-                                  decoration: const InputDecoration(labelText: 'Longitude'),
+                                  decoration: InputDecoration(labelText: tr(context, 'Longitude')),
                                   validator: _coordinate,
                                 ),
                               ),
@@ -459,7 +460,7 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
                           SwitchListTile.adaptive(
                             contentPadding: EdgeInsets.zero,
                             activeTrackColor: AppColors.green,
-                            title: const Text(
+                            title: const AppText(
                               'Use as my default address',
                               style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
                             ),
@@ -483,11 +484,11 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
                                   color: Colors.white,
                                 ),
                               )
-                            : const Text('Save address'),
+                            : const AppText('Save address'),
                       ),
                     ),
                     const SizedBox(height: 12),
-                    const Text(
+                    const AppText(
                       'Tip: the demo stores are around Vijay Nagar, Indore. Keep these coordinates to test nearby shop selection.',
                       textAlign: TextAlign.center,
                       style: TextStyle(fontSize: 10.5, color: AppColors.muted, height: 1.4),
@@ -507,8 +508,8 @@ class _AddressFormScreenState extends State<AddressFormScreen> {
 
   String? _coordinate(String? value) {
     final number = double.tryParse(value?.trim() ?? '');
-    if (number == null) return 'Enter a number';
-    if (number < -180 || number > 180) return 'Out of range';
+    if (number == null) return AppLocalizations.current.tr('Enter a number');
+    if (number < -180 || number > 180) return AppLocalizations.current.tr('Out of range');
     return null;
   }
 }

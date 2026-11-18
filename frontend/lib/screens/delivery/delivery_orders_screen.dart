@@ -7,6 +7,7 @@ import '../../state/auth_provider.dart';
 import '../../state/delivery_provider.dart';
 import '../../widgets/common.dart';
 import 'delivery_widgets.dart';
+import '../../core/localization.dart';
 
 class DeliveryOrdersScreen extends StatefulWidget {
   const DeliveryOrdersScreen({super.key});
@@ -67,15 +68,15 @@ class _DeliveryOrdersScreenState extends State<DeliveryOrdersScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My deliveries'),
+        title: const AppText('My deliveries'),
         actions: [
           IconButton(
-            tooltip: 'Refresh',
+            tooltip: context.tr('Refresh'),
             onPressed: provider.load,
             icon: const Icon(Icons.refresh_rounded),
           ),
           IconButton(
-            tooltip: 'Sign out',
+            tooltip: context.tr('Sign out'),
             onPressed: auth.logout,
             icon: const Icon(Icons.logout_rounded),
           ),
@@ -96,7 +97,7 @@ class _DeliveryOrdersScreenState extends State<DeliveryOrdersScreen> {
                   itemBuilder: (context, index) {
                     final filter = _filters[index];
                     return ChoiceChip(
-                      label: Text(filter),
+                      label: AppText(filter),
                       selected: _filter == filter,
                       onSelected: (_) => setState(() => _filter = filter),
                     );

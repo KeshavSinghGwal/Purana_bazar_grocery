@@ -6,6 +6,7 @@ import '../../core/app_theme.dart';
 import '../../core/formatters.dart';
 import '../../models/models.dart';
 import '../../widgets/common.dart';
+import '../../core/localization.dart';
 
 class DeliveryOrderCard extends StatelessWidget {
   const DeliveryOrderCard({
@@ -49,12 +50,12 @@ class DeliveryOrderCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    AppText(
                       order.orderNumber,
                       style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w800),
                     ),
                     const SizedBox(height: 2),
-                    Text(
+                    AppText(
                       '${compactDate(order.createdAt)} · ${distance.toStringAsFixed(1)} km trip',
                       style: const TextStyle(fontSize: 9.5, color: AppColors.soft),
                     ),
@@ -93,7 +94,7 @@ class DeliveryOrderCard extends StatelessWidget {
             trailing: order.customerPhone,
           ),
           const SizedBox(height: 10),
-          Text(
+          AppText(
             order.items.map((item) => '${item.productName} × ${item.quantity}').join('  ·  '),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -101,7 +102,7 @@ class DeliveryOrderCard extends StatelessWidget {
           ),
           if (order.customerNote != null) ...[
             const SizedBox(height: 5),
-            Text(
+            AppText(
               'Note: ${order.customerNote}',
               style: const TextStyle(
                 fontSize: 10,
@@ -119,7 +120,7 @@ class DeliveryOrderCard extends StatelessWidget {
                   color: AppColors.paleMint,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: Text(
+                child: AppText(
                   order.paymentMethod == 'COD'
                       ? 'Collect ${rupee(order.totalAmount)}'
                       : 'Prepaid · ${rupee(order.totalAmount)}',
@@ -156,7 +157,7 @@ class DeliveryOrderCard extends StatelessWidget {
                               color: Colors.white,
                             ),
                           )
-                        : Text(actionLabel),
+                        : AppText(actionLabel),
                   ),
                 )
               else if (order.orderStatus == 'DELIVERED')
@@ -164,7 +165,7 @@ class DeliveryOrderCard extends StatelessWidget {
                   children: [
                     Icon(Icons.check_circle_rounded, size: 15, color: AppColors.green),
                     SizedBox(width: 4),
-                    Text(
+                    AppText(
                       'Completed',
                       style: TextStyle(
                         fontSize: 11,
@@ -206,7 +207,7 @@ class DeliveryOrderCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              AppText(
                 eyebrow,
                 style: TextStyle(
                   fontSize: 8,
@@ -216,13 +217,13 @@ class DeliveryOrderCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 1),
-              Text(
+              AppText(
                 title,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700),
               ),
-              Text(
+              AppText(
                 subtitle,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -233,7 +234,7 @@ class DeliveryOrderCard extends StatelessWidget {
         ),
         if (trailing != null) ...[
           const SizedBox(width: 8),
-          Text(
+          AppText(
             trailing,
             style: const TextStyle(
               fontSize: 10.5,

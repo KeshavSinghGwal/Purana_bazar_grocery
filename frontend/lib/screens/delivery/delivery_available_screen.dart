@@ -8,6 +8,7 @@ import '../../state/auth_provider.dart';
 import '../../state/delivery_provider.dart';
 import '../../widgets/common.dart';
 import 'delivery_widgets.dart';
+import '../../core/localization.dart';
 
 class DeliveryAvailableScreen extends StatefulWidget {
   const DeliveryAvailableScreen({super.key});
@@ -43,15 +44,15 @@ class _DeliveryAvailableScreenState extends State<DeliveryAvailableScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Available pickups'),
+        title: const AppText('Available pickups'),
         actions: [
           IconButton(
-            tooltip: 'Refresh',
+            tooltip: context.tr('Refresh'),
             onPressed: provider.load,
             icon: const Icon(Icons.refresh_rounded),
           ),
           IconButton(
-            tooltip: 'Sign out',
+            tooltip: context.tr('Sign out'),
             onPressed: auth.logout,
             icon: const Icon(Icons.logout_rounded),
           ),
@@ -108,7 +109,7 @@ class _DeliveryAvailableScreenState extends State<DeliveryAvailableScreen> {
                                         color: AppColors.green,
                                       ),
                                       const SizedBox(width: 5),
-                                      Text(
+                                      AppText(
                                         '${provider.available.length} ready ${provider.available.length == 1 ? 'order' : 'orders'} nearby',
                                         style: const TextStyle(
                                           fontSize: 12,

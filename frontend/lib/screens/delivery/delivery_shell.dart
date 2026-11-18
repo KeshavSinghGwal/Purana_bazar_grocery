@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../state/delivery_provider.dart';
+import '../../core/localization.dart';
 import 'delivery_available_screen.dart';
 import 'delivery_dashboard_screen.dart';
 import 'delivery_orders_screen.dart';
@@ -37,21 +38,21 @@ class _DeliveryShellState extends State<DeliveryShell> {
                 context.read<DeliveryProvider>().load(silent: true);
               }
             },
-            destinations: const [
+            destinations: [
               NavigationDestination(
-                icon: Icon(Icons.dashboard_outlined),
-                selectedIcon: Icon(Icons.dashboard_rounded),
-                label: 'Overview',
+                icon: const Icon(Icons.dashboard_outlined),
+                selectedIcon: const Icon(Icons.dashboard_rounded),
+                label: context.tr('Overview'),
               ),
               NavigationDestination(
-                icon: Icon(Icons.storefront_outlined),
-                selectedIcon: Icon(Icons.storefront_rounded),
-                label: 'Available',
+                icon: const Icon(Icons.storefront_outlined),
+                selectedIcon: const Icon(Icons.storefront_rounded),
+                label: context.tr('Available'),
               ),
               NavigationDestination(
-                icon: Icon(Icons.delivery_dining_outlined),
-                selectedIcon: Icon(Icons.delivery_dining_rounded),
-                label: 'Deliveries',
+                icon: const Icon(Icons.delivery_dining_outlined),
+                selectedIcon: const Icon(Icons.delivery_dining_rounded),
+                label: context.tr('Deliveries'),
               ),
             ],
           ),

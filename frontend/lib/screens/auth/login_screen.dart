@@ -6,8 +6,10 @@ import '../../core/app_theme.dart';
 import '../../core/formatters.dart';
 import '../../state/auth_provider.dart';
 import '../../widgets/common.dart';
+import '../../widgets/language_selector.dart';
 import 'register_screen.dart';
 import 'shop_owner_register_screen.dart';
+import '../../core/localization.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -84,8 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
           SafeArea(
-            child: Center(
-              child: SingleChildScrollView(
+            child: Center(              child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 26),
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 460),
@@ -94,12 +95,12 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       const AppLogo(),
                       const SizedBox(height: 40),
-                      Text(
+                      AppText(
                         'Fresh groceries,\nfrom your neighbourhood.',
                         style: Theme.of(context).textTheme.displaySmall,
                       ),
                       const SizedBox(height: 12),
-                      const Text(
+                      const AppText(
                         'Choose the best nearby shop for your entire cart, or shop directly from a store you love.',
                         style: TextStyle(
                           fontSize: 14,
@@ -117,12 +118,12 @@ class _LoginScreenState extends State<LoginScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
+                              AppText(
                                 'Welcome back',
                                 style: Theme.of(context).textTheme.headlineSmall,
                               ),
                               const SizedBox(height: 5),
-                              const Text(
+                              const AppText(
                                 'Sign in to continue shopping.',
                                 style: TextStyle(fontSize: 13, color: AppColors.muted),
                               ),
@@ -132,15 +133,15 @@ class _LoginScreenState extends State<LoginScreen> {
                                 keyboardType: TextInputType.emailAddress,
                                 autofillHints: const [AutofillHints.email],
                                 textInputAction: TextInputAction.next,
-                                decoration: const InputDecoration(
-                                  labelText: 'Email address',
+                                decoration: InputDecoration(
+                                  labelText: tr(context, 'Email address'),
                                   prefixIcon: Icon(Icons.mail_outline_rounded, size: 20),
                                 ),
                                 validator: (value) {
                                   if (value == null || value.trim().isEmpty) {
-                                    return 'Enter your email address';
+                                    return AppLocalizations.current.tr('Enter your email address');
                                   }
-                                  if (!value.contains('@')) return 'Enter a valid email';
+                                  if (!value.contains('@')) return AppLocalizations.current.tr('Enter a valid email');
                                   return null;
                                 },
                               ),
@@ -152,7 +153,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 textInputAction: TextInputAction.done,
                                 onFieldSubmitted: (_) => _submit(),
                                 decoration: InputDecoration(
-                                  labelText: 'Password',
+                                  labelText: tr(context, 'Password'),
                                   prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20),
                                   suffixIcon: IconButton(
                                     onPressed: () => setState(() => _obscure = !_obscure),
@@ -182,7 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                             color: Colors.white,
                                           ),
                                         )
-                                      : const Text('Sign in'),
+                                      : const AppText('Sign in'),
                                 ),
                               ),
                               const SizedBox(height: 14),
@@ -190,7 +191,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 alignment: WrapAlignment.center,
                                 crossAxisAlignment: WrapCrossAlignment.center,
                                 children: [
-                                  const Text(
+                                  const AppText(
                                     'New to Purana Bazaar?',
                                     style: TextStyle(fontSize: 13, color: AppColors.muted),
                                   ),
@@ -200,7 +201,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                         builder: (_) => const RegisterScreen(),
                                       ),
                                     ),
-                                    child: const Text('Create account'),
+                                    child: const AppText('Create account'),
                                   ),
                                 ],
                               ),
@@ -214,7 +215,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           Expanded(child: Divider()),
                           Padding(
                             padding: EdgeInsets.symmetric(horizontal: 12),
-                            child: Text(
+                            child: AppText(
                               'TRY A DEMO ACCOUNT',
                               style: TextStyle(
                                 fontSize: 9,
@@ -247,12 +248,12 @@ class _LoginScreenState extends State<LoginScreen> {
                             ),
                           ),
                           icon: const Icon(Icons.storefront_outlined, size: 18),
-                          label: const Text('Register your shop'),
+                          label: const AppText('Register your shop'),
                         ),
                       ),
                       const SizedBox(height: 8),
                       const Center(
-                        child: Text(
+                        child: AppText(
                           'By continuing you agree to fair-use and local delivery policies.',
                           textAlign: TextAlign.center,
                           style: TextStyle(fontSize: 10, color: AppColors.soft),
@@ -264,6 +265,11 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
+          Positioned(
+            top: 6,
+            right: 6,
+            child: SafeArea(child: LanguageButton()),
+          ),
         ],
       ),
     );
@@ -272,7 +278,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget _demoChip(String label, String email, String password) {
     return ActionChip(
       avatar: const Icon(Icons.person_outline_rounded, size: 16),
-      label: Text(label),
+      label: AppText(label),
       onPressed: () => _useDemo(email, password),
     );
   }

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../core/app_theme.dart';
 import '../core/formatters.dart';
 import '../models/models.dart';
+import '../core/localization.dart';
 
 class AppLogo extends StatelessWidget {
   const AppLogo({super.key, this.small = false, this.onDark = false});
@@ -42,7 +43,7 @@ class AppLogo extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
+              AppText(
                 'Purana Bazaar',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -55,7 +56,7 @@ class AppLogo extends StatelessWidget {
                 ),
               ),
               if (!small)
-                Text(
+                AppText(
                   'Your neighbourhood, delivered',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -231,10 +232,10 @@ class SectionHeader extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(title, style: Theme.of(context).textTheme.titleLarge),
+                AppText(title, style: Theme.of(context).textTheme.titleLarge),
                 if (subtitle != null) ...[
                   const SizedBox(height: 3),
-                  Text(
+                  AppText(
                     subtitle!,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
@@ -248,7 +249,7 @@ class SectionHeader extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(actionLabel!),
+                  AppText(actionLabel!),
                   const SizedBox(width: 2),
                   const Icon(Icons.arrow_forward_rounded, size: 16),
                 ],
@@ -282,7 +283,7 @@ class StatusPill extends StatelessWidget {
             Icon(icon, size: 13, color: color),
             const SizedBox(width: 4),
           ],
-          Text(
+          AppText(
             statusLabel(status),
             style: TextStyle(
               color: color,
@@ -306,7 +307,7 @@ class RatingPill extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (rating == null) {
-      return Text(
+      return AppText(
         'New shop',
         style: Theme.of(context)
             .textTheme
@@ -319,7 +320,7 @@ class RatingPill extends StatelessWidget {
       children: [
         const Icon(Icons.star_rounded, size: 15, color: Color(0xFFF5A623)),
         const SizedBox(width: 3),
-        Text(
+        AppText(
           rating!.toStringAsFixed(1),
           style: const TextStyle(
             fontSize: 12,
@@ -329,7 +330,7 @@ class RatingPill extends StatelessWidget {
         ),
         if (count != null) ...[
           const SizedBox(width: 3),
-          Text(
+          AppText(
             '($count)',
             style: const TextStyle(fontSize: 11, color: AppColors.muted),
           ),
@@ -358,7 +359,7 @@ class LoadingView extends StatelessWidget {
               child: CircularProgressIndicator(strokeWidth: 2.6),
             ),
             const SizedBox(height: 14),
-            Text(message, style: Theme.of(context).textTheme.bodySmall),
+            AppText(message, style: Theme.of(context).textTheme.bodySmall),
           ],
         ),
       ),
@@ -396,13 +397,13 @@ class ErrorRetry extends StatelessWidget {
               child: Icon(icon, color: AppColors.green, size: 31),
             ),
             const SizedBox(height: 18),
-            Text(
+            AppText(
               'Could not load this page',
               style: Theme.of(context).textTheme.titleMedium,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 7),
-            Text(
+            AppText(
               message,
               style: Theme.of(context).textTheme.bodySmall,
               textAlign: TextAlign.center,
@@ -411,7 +412,7 @@ class ErrorRetry extends StatelessWidget {
             OutlinedButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: const Text('Try again'),
+              label: const AppText('Try again'),
             ),
           ],
         ),
@@ -454,7 +455,7 @@ class EmptyState extends StatelessWidget {
               child: Icon(icon, color: AppColors.green, size: 42),
             ),
             const SizedBox(height: 20),
-            Text(
+            AppText(
               title,
               style: Theme.of(context).textTheme.headlineSmall,
               textAlign: TextAlign.center,
@@ -462,7 +463,7 @@ class EmptyState extends StatelessWidget {
             const SizedBox(height: 8),
             ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 420),
-              child: Text(
+              child: AppText(
                 message,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                       color: AppColors.muted,
@@ -474,7 +475,7 @@ class EmptyState extends StatelessWidget {
               const SizedBox(height: 22),
               ElevatedButton(
                 onPressed: onAction,
-                child: Text(actionLabel!),
+                child: AppText(actionLabel!),
               ),
             ],
           ],
@@ -530,7 +531,7 @@ class ProductCard extends StatelessWidget {
                       color: AppColors.orange,
                       borderRadius: BorderRadius.circular(7),
                     ),
-                    child: Text(
+                    child: AppText(
                       'Only ${product.totalStock} left',
                       style: const TextStyle(
                         color: Colors.white,
@@ -549,7 +550,7 @@ class ProductCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (product.brand != null)
-                    Text(
+                    AppText(
                       product.brand!,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -559,7 +560,7 @@ class ProductCard extends StatelessWidget {
                         color: AppColors.muted,
                       ),
                     ),
-                  Text(
+                  AppText(
                     product.name,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -571,7 +572,7 @@ class ProductCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 2),
-                  Text(
+                  AppText(
                     product.unit,
                     style: const TextStyle(fontSize: 11, color: AppColors.muted),
                   ),
@@ -583,7 +584,7 @@ class ProductCard extends StatelessWidget {
                       children: [
                         Expanded(
                           child: price == null
-                              ? const Text(
+                              ? const AppText(
                                   'Out of stock',
                                   style: TextStyle(
                                     fontSize: 11,
@@ -594,7 +595,7 @@ class ProductCard extends StatelessWidget {
                               : Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
+                                    AppText(
                                       rupee(price),
                                       style: const TextStyle(
                                         fontSize: 16,
@@ -602,7 +603,7 @@ class ProductCard extends StatelessWidget {
                                         color: AppColors.ink,
                                       ),
                                     ),
-                                    Text(
+                                    AppText(
                                       product.availableShops > 1
                                           ? '${product.availableShops} shops'
                                           : 'Best price',
@@ -630,7 +631,7 @@ class ProductCard extends StatelessWidget {
                                   fontWeight: FontWeight.w900,
                                 ),
                               ),
-                              child: Text(addLabel),
+                              child: AppText(addLabel),
                             ),
                           ),
                       ],
@@ -682,7 +683,7 @@ class ShopCard extends StatelessWidget {
                   color: shop.openNow ? Colors.white : AppColors.ink,
                   borderRadius: BorderRadius.circular(7),
                 ),
-                child: Text(
+                child: AppText(
                   shop.openNow ? 'OPEN NOW' : 'CLOSED',
                   style: TextStyle(
                     fontSize: 8,
@@ -703,7 +704,7 @@ class ShopCard extends StatelessWidget {
                     color: AppColors.ink.withValues(alpha: 0.82),
                     borderRadius: BorderRadius.circular(7),
                   ),
-                  child: Text(
+                  child: AppText(
                     '${shop.distanceKm!.toStringAsFixed(1)} km',
                     style: const TextStyle(
                       color: Colors.white,
@@ -719,7 +720,7 @@ class ShopCard extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: Text(
+              child: AppText(
                 shop.name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -738,7 +739,7 @@ class ShopCard extends StatelessWidget {
           children: [
             const Icon(Icons.delivery_dining_rounded, size: 14, color: AppColors.green),
             const SizedBox(width: 4),
-            Text(
+            AppText(
               '${shop.estimatedDeliveryMinutes} min',
               style: const TextStyle(fontSize: 11, color: AppColors.muted),
             ),
@@ -746,7 +747,7 @@ class ShopCard extends StatelessWidget {
             const Icon(Icons.place_outlined, size: 13, color: AppColors.muted),
             const SizedBox(width: 2),
             Expanded(
-              child: Text(
+              child: AppText(
                 shop.shopCategory ?? 'Neighbourhood store',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -809,7 +810,7 @@ class CategoryTile extends StatelessWidget {
               icon: Icons.category_rounded,
             ),
             const SizedBox(height: 7),
-            Text(
+            AppText(
               category.name,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -872,7 +873,7 @@ class QuantitySelector extends StatelessWidget {
                       height: 13,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
-                  : Text(
+                  : AppText(
                       '$quantity',
                       style: const TextStyle(
                         fontSize: 13,
@@ -918,7 +919,7 @@ class InfoRow extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
-            child: Text(
+            child: AppText(
               label,
               style: TextStyle(
                 fontSize: bold ? 14 : 13,
@@ -927,7 +928,7 @@ class InfoRow extends StatelessWidget {
               ),
             ),
           ),
-          Text(
+          AppText(
             value,
             style: TextStyle(
               fontSize: bold ? 17 : 13,

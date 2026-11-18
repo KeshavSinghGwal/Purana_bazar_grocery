@@ -5,6 +5,7 @@ import '../../core/app_theme.dart';
 import '../../core/formatters.dart';
 import '../../models/models.dart';
 import '../../widgets/common.dart';
+import '../../core/localization.dart';
 
 class AdminCustomersScreen extends StatefulWidget {
   const AdminCustomersScreen({super.key});
@@ -67,8 +68,8 @@ class _AdminCustomersScreenState extends State<AdminCustomersScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(suspend ? 'Suspend customer?' : 'Reactivate customer?'),
-        content: Text(
+        title: AppText(suspend ? 'Suspend customer?' : 'Reactivate customer?'),
+        content: AppText(
           suspend
               ? '${customer.name} will no longer be able to sign in or place orders. Existing orders are not affected.'
               : '${customer.name} will be able to sign in and order again.',
@@ -76,11 +77,11 @@ class _AdminCustomersScreenState extends State<AdminCustomersScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: const AppText('Cancel'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text(
+            child: AppText(
               suspend ? 'Suspend' : 'Reactivate',
               style: TextStyle(color: suspend ? AppColors.red : AppColors.green),
             ),
@@ -111,10 +112,10 @@ class _AdminCustomersScreenState extends State<AdminCustomersScreen> {
     final active = _customers.where((customer) => customer.active).length;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Customers'),
+        title: const AppText('Customers'),
         actions: [
           IconButton(
-            tooltip: 'Refresh',
+            tooltip: context.tr('Refresh'),
             onPressed: _load,
             icon: const Icon(Icons.refresh_rounded),
           ),
@@ -164,8 +165,8 @@ class _AdminCustomersScreenState extends State<AdminCustomersScreen> {
                           const SizedBox(height: 14),
                           TextField(
                             onChanged: (value) => setState(() => _query = value),
-                            decoration: const InputDecoration(
-                              hintText: 'Search name, email or phone…',
+                            decoration: InputDecoration(
+                              hintText: tr(context, 'Search name, email or phone…'),
                               prefixIcon: Icon(Icons.search_rounded, size: 20),
                             ),
                           ),
@@ -204,11 +205,11 @@ class _AdminCustomersScreenState extends State<AdminCustomersScreen> {
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
+              AppText(
                 value,
                 style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w900),
               ),
-              Text(label, style: const TextStyle(fontSize: 9.5, color: AppColors.muted)),
+              AppText(label, style: const TextStyle(fontSize: 9.5, color: AppColors.muted)),
             ],
           ),
         ],
@@ -225,7 +226,7 @@ class _AdminCustomersScreenState extends State<AdminCustomersScreen> {
           CircleAvatar(
             radius: 21,
             backgroundColor: customer.active ? AppColors.mint : AppColors.border,
-            child: Text(
+            child: AppText(
               initials(customer.name),
               style: TextStyle(
                 fontSize: 13,
@@ -242,7 +243,7 @@ class _AdminCustomersScreenState extends State<AdminCustomersScreen> {
                 Row(
                   children: [
                     Flexible(
-                      child: Text(
+                      child: AppText(
                         customer.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
@@ -257,14 +258,14 @@ class _AdminCustomersScreenState extends State<AdminCustomersScreen> {
                   ],
                 ),
                 const SizedBox(height: 2),
-                Text(
+                AppText(
                   customer.email,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(fontSize: 10.5, color: AppColors.muted),
                 ),
                 const SizedBox(height: 2),
-                Text(
+                AppText(
                   '${customer.phone ?? 'No phone'} · ${customer.orderCount} order${customer.orderCount == 1 ? '' : 's'} · Joined ${fullDate(customer.createdAt)}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

@@ -8,6 +8,7 @@ import '../../core/formatters.dart';
 import '../../models/models.dart';
 import '../../services/payment_service.dart';
 import '../../widgets/common.dart';
+import '../../core/localization.dart';
 
 class OrderDetailsScreen extends StatefulWidget {
   const OrderDetailsScreen({super.key, required this.orderId});
@@ -105,11 +106,11 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Cancel this order?'),
+        title: const AppText('Cancel this order?'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
+            const AppText(
               'The shop will be notified and any reserved stock will be restored.',
               style: TextStyle(fontSize: 13, height: 1.45),
             ),
@@ -117,9 +118,9 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
             TextField(
               controller: reason,
               maxLines: 2,
-              decoration: const InputDecoration(
-                labelText: 'Reason (optional)',
-                hintText: 'e.g. Ordered by mistake',
+              decoration: InputDecoration(
+                labelText: tr(context, 'Reason (optional)'),
+                hintText: tr(context, 'e.g. Ordered by mistake'),
               ),
             ),
           ],
@@ -127,11 +128,11 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Keep order'),
+            child: const AppText('Keep order'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Cancel order', style: TextStyle(color: AppColors.red)),
+            child: const AppText('Cancel order', style: TextStyle(color: AppColors.red)),
           ),
         ],
       ),
@@ -162,7 +163,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: Text('Rate ${_order!.shop.name}'),
+          title: AppText('Rate ${_order!.shop.name}'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -183,18 +184,18 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
               TextField(
                 controller: comment,
                 maxLines: 3,
-                decoration: const InputDecoration(hintText: 'How was your experience?'),
+                decoration: InputDecoration(hintText: tr(context, 'How was your experience?')),
               ),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Not now'),
+              child: const AppText('Not now'),
             ),
             ElevatedButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Submit review'),
+              child: const AppText('Submit review'),
             ),
           ],
         ),
@@ -222,10 +223,10 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
     final order = _order;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Order details'),
+        title: const AppText('Order details'),
         actions: [
           IconButton(
-            tooltip: 'Refresh',
+            tooltip: context.tr('Refresh'),
             onPressed: _load,
             icon: const Icon(Icons.refresh_rounded),
           ),
@@ -271,10 +272,10 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text('Delivery note',
+                                      AppText('Delivery note',
                                           style: Theme.of(context).textTheme.titleSmall),
                                       const SizedBox(height: 5),
-                                      Text(
+                                      AppText(
                                         order.customerNote!,
                                         style: const TextStyle(
                                           fontSize: 12,
@@ -291,7 +292,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                                 OutlinedButton.icon(
                                   onPressed: _reviewShop,
                                   icon: const Icon(Icons.star_outline_rounded),
-                                  label: const Text('Rate this shop'),
+                                  label: const AppText('Rate this shop'),
                                 ),
                               if (order.canRetryPayment) ...[
                                 const SizedBox(height: 8),
@@ -309,7 +310,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                                             ),
                                           )
                                         : const Icon(Icons.lock_outline_rounded, size: 18),
-                                    label: Text(_paying
+                                    label: AppText(_paying
                                         ? 'Opening secure checkout…'
                                         : 'Pay ${rupee(order.totalAmount)} now'),
                                   ),
@@ -319,7 +320,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                                 const SizedBox(height: 8),
                                 TextButton(
                                   onPressed: _cancel,
-                                  child: const Text(
+                                  child: const AppText(
                                     'Cancel order',
                                     style: TextStyle(color: AppColors.red),
                                   ),
@@ -346,7 +347,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
+                    const AppText(
                       'ORDER NUMBER',
                       style: TextStyle(
                         fontSize: 8.5,
@@ -356,7 +357,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                       ),
                     ),
                     const SizedBox(height: 3),
-                    Text(
+                    AppText(
                       order.orderNumber,
                       style: const TextStyle(
                         fontSize: 20,
@@ -371,7 +372,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
             ],
           ),
           const SizedBox(height: 7),
-          Text(
+          AppText(
             'Placed ${fullDate(order.createdAt)}',
             style: const TextStyle(fontSize: 10.5, color: AppColors.muted),
           ),
@@ -384,19 +385,19 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    AppText(
                       order.shop.name,
                       style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800),
                     ),
                     const SizedBox(height: 2),
-                    Text(
+                    AppText(
                       '${order.shoppingMode == 'PRODUCT_CHOICE' ? 'Product Choice' : 'Shop Choice'} · ${order.paymentMethod == 'COD' ? 'Cash on Delivery' : 'Online payment'}',
                       style: const TextStyle(fontSize: 10.5, color: AppColors.muted),
                     ),
                   ],
                 ),
               ),
-              Text(
+              AppText(
                 rupee(order.totalAmount),
                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
               ),
@@ -425,7 +426,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: Text(
+                child: AppText(
                   failed ? 'Payment failed' : 'Payment pending',
                   style: const TextStyle(
                     fontSize: 15,
@@ -434,7 +435,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                   ),
                 ),
               ),
-              Text(
+              AppText(
                 rupee(order.totalAmount),
                 style: const TextStyle(
                   fontSize: 17,
@@ -445,7 +446,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
             ],
           ),
           const SizedBox(height: 7),
-          Text(
+          AppText(
             'Order ${order.orderNumber} is reserved. Complete the payment to confirm it with '
             '${order.shop.name}. Unpaid orders are released automatically after 2 hours.',
             style: const TextStyle(fontSize: 11.5, height: 1.45, color: Color(0xFF8A5200)),
@@ -466,7 +467,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                         ),
                       )
                     : const Icon(Icons.lock_outline_rounded, size: 18),
-                label: Text(_paying
+                label: AppText(_paying
                     ? 'Opening secure checkout…'
                     : failed
                         ? 'Retry payment · ${rupee(order.totalAmount)}'
@@ -486,7 +487,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Order progress', style: Theme.of(context).textTheme.titleMedium),
+          AppText('Order progress', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 14),
           ...List.generate(_timeline.length, (index) {
             final status = _timeline[index];
@@ -532,7 +533,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      AppText(
                         _timelineLabel(status),
                         style: TextStyle(
                           fontSize: 12.5,
@@ -541,7 +542,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                         ),
                       ),
                       if (current)
-                        const Text(
+                        const AppText(
                           'Current status',
                           style: TextStyle(fontSize: 9.5, color: AppColors.green),
                         ),
@@ -575,7 +576,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                AppText(
                   cancelled ? 'Order cancelled' : 'Order rejected',
                   style: const TextStyle(
                     fontSize: 14,
@@ -584,7 +585,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
+                AppText(
                   order.cancellationReason ??
                       'This order is no longer active. Any reserved stock has been restored.',
                   style: const TextStyle(fontSize: 11.5, height: 1.45, color: AppColors.red),
@@ -603,7 +604,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Delivery details', style: Theme.of(context).textTheme.titleMedium),
+          AppText('Delivery details', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 12),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -611,7 +612,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
               const Icon(Icons.location_on_outlined, color: AppColors.green, size: 20),
               const SizedBox(width: 8),
               Expanded(
-                child: Text(
+                child: AppText(
                   order.deliveryAddress,
                   style: const TextStyle(fontSize: 12, height: 1.45),
                 ),
@@ -623,7 +624,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
             children: [
               const Icon(Icons.person_outline_rounded, color: AppColors.muted, size: 18),
               const SizedBox(width: 6),
-              Text(
+              AppText(
                 order.customerName,
                 style: const TextStyle(fontSize: 11.5, color: AppColors.muted),
               ),
@@ -631,7 +632,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 const SizedBox(width: 12),
                 const Icon(Icons.phone_outlined, color: AppColors.muted, size: 16),
                 const SizedBox(width: 4),
-                Text(
+                AppText(
                   order.customerPhone!,
                   style: const TextStyle(fontSize: 11.5, color: AppColors.muted),
                 ),
@@ -649,7 +650,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Items', style: Theme.of(context).textTheme.titleMedium),
+          AppText('Items', style: Theme.of(context).textTheme.titleMedium),
           const SizedBox(height: 10),
           ...order.items.map(
             (item) => Padding(
@@ -662,21 +663,21 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        AppText(
                           item.productName,
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
                           ),
                         ),
-                        Text(
+                        AppText(
                           '${item.unit} × ${item.quantity}',
                           style: const TextStyle(fontSize: 10, color: AppColors.muted),
                         ),
                       ],
                     ),
                   ),
-                  Text(
+                  AppText(
                     rupee(item.totalPrice),
                     style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
                   ),
@@ -716,12 +717,12 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    AppText(
                       online ? 'Online payment' : 'Cash on Delivery',
                       style: const TextStyle(fontSize: 12.5, fontWeight: FontWeight.w700),
                     ),
                     const SizedBox(height: 2),
-                    Text(
+                    AppText(
                       online
                           ? 'Secured by ${order.paymentGateway == 'RAZORPAY' ? 'Razorpay' : (order.paymentGateway ?? 'the payment gateway')}'
                           : 'Collected by the delivery partner',
@@ -742,7 +743,7 @@ class _OrderDetailsScreenState extends State<OrderDetailsScreen> {
           ],
           if (online && order.paymentStatus == 'REFUNDED') ...[
             const SizedBox(height: 6),
-            const Text(
+            const AppText(
               'Your refund has been initiated and usually reaches your account within 5–7 working days.',
               style: TextStyle(fontSize: 10.5, height: 1.4, color: AppColors.muted),
             ),

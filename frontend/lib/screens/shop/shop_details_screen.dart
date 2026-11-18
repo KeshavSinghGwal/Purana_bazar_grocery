@@ -10,6 +10,7 @@ import '../../state/location_provider.dart';
 import '../../widgets/cart_button.dart';
 import '../../widgets/common.dart';
 import '../product/product_details_screen.dart';
+import '../../core/localization.dart';
 
 class ShopDetailsScreen extends StatefulWidget {
   const ShopDetailsScreen({super.key, required this.shop});
@@ -87,7 +88,7 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: const Text('Rate this shop'),
+          title: const AppText('Rate this shop'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -108,12 +109,12 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
               TextField(
                 controller: comment,
                 maxLines: 3,
-                decoration: const InputDecoration(
-                  hintText: 'Share your experience (optional)',
+                decoration: InputDecoration(
+                  hintText: tr(context, 'Share your experience (optional)'),
                 ),
               ),
               const SizedBox(height: 10),
-              const Text(
+              const AppText(
                 'You can review a shop only after a delivered order from it.',
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 10.5, color: AppColors.muted),
@@ -123,11 +124,11 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
+              child: const AppText('Cancel'),
             ),
             ElevatedButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Submit'),
+              child: const AppText('Submit'),
             ),
           ],
         ),
@@ -174,7 +175,7 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
     final filtered = _filteredInventory;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Shop details'),
+        title: const AppText('Shop details'),
         actions: const [CartButton(), SizedBox(width: 4)],
       ),
       body: SafeArea(
@@ -214,7 +215,7 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
                                   Row(
                                     children: [
                                       Expanded(
-                                        child: Text(
+                                        child: AppText(
                                           _shop.name,
                                           style: const TextStyle(
                                             fontSize: 19,
@@ -233,7 +234,7 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
                                           ),
                                           child: Row(
                                             children: [
-                                              Text(
+                                              AppText(
                                                 _shop.rating!.toStringAsFixed(1),
                                                 style: const TextStyle(
                                                   color: Colors.white,
@@ -250,7 +251,7 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
                                     ],
                                   ),
                                   const SizedBox(height: 4),
-                                  Text(
+                                  AppText(
                                     '${_shop.shopCategory ?? 'Neighbourhood store'} · ${_shop.address}',
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
@@ -304,7 +305,7 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
                         Icon(Icons.warning_amber_rounded, color: AppColors.red, size: 20),
                         SizedBox(width: 9),
                         Expanded(
-                          child: Text(
+                          child: AppText(
                             'This shop is outside its delivery radius for your current address. Checkout will be blocked.',
                             style: TextStyle(fontSize: 11.5, color: AppColors.red),
                           ),
@@ -326,7 +327,7 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
                       scrollDirection: Axis.horizontal,
                       children: [
                         ChoiceChip(
-                          label: const Text('All items'),
+                          label: const AppText('All items'),
                           selected: _categoryId == null,
                           onSelected: (_) => setState(() => _categoryId = null),
                         ),
@@ -335,7 +336,7 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
                           (category) => Padding(
                             padding: const EdgeInsets.only(right: 7),
                             child: ChoiceChip(
-                              label: Text(category.name),
+                              label: AppText(category.name),
                               selected: _categoryId == category.id,
                               onSelected: (_) => setState(() =>
                                   _categoryId =
@@ -435,7 +436,7 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
                             color: AppColors.muted, size: 24),
                         const SizedBox(width: 11),
                         Expanded(
-                          child: Text(
+                          child: AppText(
                             'Be the first to review this shop after a delivered order.',
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
@@ -457,7 +458,7 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
                                     CircleAvatar(
                                       radius: 15,
                                       backgroundColor: AppColors.mint,
-                                      child: Text(
+                                      child: AppText(
                                         initials(review.customerName),
                                         style: const TextStyle(
                                           fontSize: 10,
@@ -468,7 +469,7 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
                                     ),
                                     const SizedBox(width: 8),
                                     Expanded(
-                                      child: Text(
+                                      child: AppText(
                                         review.customerName,
                                         style: const TextStyle(
                                           fontSize: 12.5,
@@ -492,7 +493,7 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
                                 ),
                                 if (review.comment != null) ...[
                                   const SizedBox(height: 7),
-                                  Text(
+                                  AppText(
                                     review.comment!,
                                     style: const TextStyle(
                                       fontSize: 12,
@@ -502,7 +503,7 @@ class _ShopDetailsScreenState extends State<ShopDetailsScreen> {
                                   ),
                                 ],
                                 const SizedBox(height: 5),
-                                Text(
+                                AppText(
                                   compactDate(review.createdAt),
                                   style: const TextStyle(
                                     fontSize: 9.5,

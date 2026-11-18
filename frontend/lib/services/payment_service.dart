@@ -4,6 +4,7 @@ import '../core/api_client.dart';
 import '../core/app_theme.dart';
 import '../core/razorpay_checkout.dart';
 import '../models/models.dart';
+import '../core/localization.dart';
 
 class PaymentCancelledException implements Exception {
   const PaymentCancelledException();
@@ -158,7 +159,7 @@ class PaymentService {
     return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Razorpay test checkout'),
+        title: const AppText('Razorpay test checkout'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -174,7 +175,7 @@ class PaymentService {
                   Icon(Icons.science_outlined, color: AppColors.green, size: 18),
                   SizedBox(width: 8),
                   Expanded(
-                    child: Text(
+                    child: AppText(
                       'Razorpay keys are not configured, so this payment is simulated.',
                       style: TextStyle(fontSize: 11, color: AppColors.darkGreen),
                     ),
@@ -183,12 +184,12 @@ class PaymentService {
               ),
             ),
             const SizedBox(height: 14),
-            Text(
+            AppText(
               'Pay ₹${session.amount.toStringAsFixed(0)} for order ${session.orderNumber}?',
               style: const TextStyle(fontSize: 13, height: 1.4),
             ),
             const SizedBox(height: 6),
-            const Text(
+            const AppText(
               'No money is charged in test mode.',
               style: TextStyle(fontSize: 11, color: AppColors.muted),
             ),
@@ -197,11 +198,11 @@ class PaymentService {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: const AppText('Cancel'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('Simulate payment'),
+            child: const AppText('Simulate payment'),
           ),
         ],
       ),

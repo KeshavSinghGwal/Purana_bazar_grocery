@@ -5,6 +5,7 @@ import '../../core/formatters.dart';
 import '../../models/models.dart';
 import '../../widgets/common.dart';
 import '../orders/order_details_screen.dart';
+import '../../core/localization.dart';
 
 class OrderConfirmationScreen extends StatelessWidget {
   const OrderConfirmationScreen({super.key, required this.order});
@@ -47,13 +48,13 @@ class OrderConfirmationScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              Text(
+              AppText(
                 'Order confirmed!',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineMedium,
               ),
               const SizedBox(height: 7),
-              Text(
+              AppText(
                 'Your order is now with ${order.shop.name}. You will pay ${rupee(order.totalAmount)} on delivery.',
                 textAlign: TextAlign.center,
                 style: const TextStyle(fontSize: 13, height: 1.5, color: AppColors.muted),
@@ -66,7 +67,7 @@ class OrderConfirmationScreen extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        const Text(
+                        const AppText(
                           'ORDER NUMBER',
                           style: TextStyle(
                             fontSize: 8.5,
@@ -82,7 +83,7 @@ class OrderConfirmationScreen extends StatelessWidget {
                     const SizedBox(height: 6),
                     Align(
                       alignment: Alignment.centerLeft,
-                      child: Text(
+                      child: AppText(
                         order.orderNumber,
                         style: const TextStyle(
                           fontSize: 22,
@@ -105,7 +106,7 @@ class OrderConfirmationScreen extends StatelessWidget {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
+                              AppText(
                                 order.shop.name,
                                 style: const TextStyle(
                                   fontSize: 13,
@@ -113,7 +114,7 @@ class OrderConfirmationScreen extends StatelessWidget {
                                 ),
                               ),
                               const SizedBox(height: 2),
-                              Text(
+                              AppText(
                                 '${order.shop.estimatedDeliveryMinutes} min · ${order.shoppingMode == 'PRODUCT_CHOICE' ? 'Product Choice' : 'Shop Choice'}',
                                 style: const TextStyle(
                                   fontSize: 10.5,
@@ -123,7 +124,7 @@ class OrderConfirmationScreen extends StatelessWidget {
                             ],
                           ),
                         ),
-                        Text(
+                        AppText(
                           rupee(order.totalAmount),
                           style: const TextStyle(
                             fontSize: 17,
@@ -140,7 +141,7 @@ class OrderConfirmationScreen extends StatelessWidget {
                             size: 18, color: AppColors.green),
                         const SizedBox(width: 6),
                         Expanded(
-                          child: Text(
+                          child: AppText(
                             order.deliveryAddress,
                             style: const TextStyle(
                               fontSize: 11,
@@ -160,7 +161,7 @@ class OrderConfirmationScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('Order items', style: Theme.of(context).textTheme.titleSmall),
+                    AppText('Order items', style: Theme.of(context).textTheme.titleSmall),
                     const SizedBox(height: 9),
                     ...order.items.map(
                       (item) => Padding(
@@ -168,12 +169,12 @@ class OrderConfirmationScreen extends StatelessWidget {
                         child: Row(
                           children: [
                             Expanded(
-                              child: Text(
+                              child: AppText(
                                 '${item.productName} × ${item.quantity}',
                                 style: const TextStyle(fontSize: 12),
                               ),
                             ),
-                            Text(
+                            AppText(
                               rupee(item.totalPrice),
                               style: const TextStyle(
                                 fontSize: 12,
@@ -203,13 +204,13 @@ class OrderConfirmationScreen extends StatelessWidget {
                   ),
                 ),
                 icon: const Icon(Icons.local_shipping_outlined),
-                label: const Text('Track this order'),
+                label: const AppText('Track this order'),
               ),
               const SizedBox(height: 10),
               OutlinedButton(
                 onPressed: () =>
                     Navigator.of(context).popUntil((route) => route.isFirst),
-                child: const Text('Continue shopping'),
+                child: const AppText('Continue shopping'),
               ),
             ],
           ),
